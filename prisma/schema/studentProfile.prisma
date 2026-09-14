@@ -1,0 +1,24 @@
+model StudentProfile {
+  id             String           @id @default(uuid()) @db.Uuid
+  studentIdNo    String?          @unique @db.VarChar(32)
+  status         EnrollmentStatus @default(ACTIVE)
+  enrollmentDate DateTime         @default(now())
+  batch          String?          @db.VarChar(50)
+  program        String?          @db.VarChar(120)
+  department     String?          @db.VarChar(120)
+  semester       Int?
+  address        String?          @db.Text
+  emergencyPhone String?          @db.VarChar(32)
+  isDeleted      Boolean          @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  userId         String           @unique @db.Uuid
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([status])
+  @@index([studentIdNo])
+  @@index([isDeleted])
+  @@map("student_profiles")
+}
