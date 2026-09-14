@@ -1,0 +1,57 @@
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  DEPARTMENT_ADMIN
+  REGISTRAR
+  FINANCE_ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  SUSPENDED
+  GRADUATED
+  WITHDRAWN
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum ExamType {
+  MIDTERM
+  FINAL
+  QUIZ
+  ASSIGNMENT
+}
+
+enum FeeType {
+  TUITION
+  REGISTRATION
+  LAB
+  LIBRARY
+  LATE_FINE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  OVERDUE
+}
+
+enum NotificationType {
+  ACADEMIC
+  FINANCIAL
+  SYSTEM
+  EXAM
+}
