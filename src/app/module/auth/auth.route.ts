@@ -23,5 +23,17 @@ router.post(
   validateRequest(UserValidation.LoginZodSchema),
   AuthController.loginUser,
 );
+router.get(
+  "/me",
+  auth(
+    Role.DEPARTMENT_ADMIN,
+    Role.FINANCE_ADMIN,
+    Role.INSTRUCTOR,
+    Role.REGISTRAR,
+    Role.STUDENT,
+    Role.SUPER_ADMIN,
+  ),
+  AuthController.getMe,
+);
 
 export const AuthRoutes = router;
