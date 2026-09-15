@@ -10,6 +10,7 @@ import httpStatus from "http-status";
 import { AppError } from "../../utils/AppError";
 import {
   IForgotPasswordPayload,
+  IGoogleLoginPayload,
   ILoginUserPayload,
   IRegisterStudentPayload,
   IRequestUser,
@@ -17,9 +18,15 @@ import {
   IVerifyEmailPayload,
 } from "./auth.interface";
 import { prisma } from "../../lib/prisma";
-import { Role, UserStatus } from "../../../generated/prisma/enums";
+import {
+  AuthProvider,
+  Role,
+  UserStatus,
+} from "../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
+import { googleClient } from "../../lib/gogleAuth";
+import { TokenPayload } from "google-auth-library";
 
 const registerStudent = async (payload: IRegisterStudentPayload) => {
   const {
@@ -513,6 +520,199 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
     html,
   });
 };
+const googleLogin = async (payload: IGoogleLoginPayload) => {
+  let googleIdTokenPayload: TokenPayload | null | undefined = null;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: payload.idToken,
+      audience: config.google_client_id,
+    });
+
+    googleIdTokenPayload = ticket.getPayload();
+  } catch (error) {
+    console.log("Google ID Token Verification Failed", error);
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Invalid Or Expired Google Id Token",
+    );
+  }
+
+  if (!googleIdTokenPayload) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Invalid Or Expired Google Id Token",
+    );
+  }
+
+  if (!googleIdTokenPayload.email) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Google Email Not Found");
+  }
+  if (!googleIdTokenPayload.name) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Google Email User Name Not Found",
+    );
+  }
+
+  const ifStudentExistWithGoogleAuth = await prisma.user.findFirst({
+    where: {
+      email: googleIdTokenPayload.email,
+      googleId: googleIdTokenPayload.sub,
+      role: Role.STUDENT,
+    },
+  });
+
+  let user = ifStudentExistWithGoogleAuth;
+
+  if (!ifStudentExistWithGoogleAuth) {
+    const ifStudentExistWithCredentials = await prisma.user.findFirst({
+      where: {
+        email: googleIdTokenPayload.email,
+        role: Role.STUDENT,
+        authProvider: AuthProvider.CREDENTIAL,
+      },
+    });
+
+    if (ifStudentExistWithCredentials) {
+      if (!ifStudentExistWithCredentials.emailVerified) {
+        throw new AppError(httpStatus.FORBIDDEN, "Email Not Verified");
+      }
+
+      if (ifStudentExistWithCredentials.status === UserStatus.BLOCKED) {
+        throw new AppError(httpStatus.FORBIDDEN, "User Is Blocked");
+      }
+
+      if (
+        ifStudentExistWithCredentials.isDeleted ||
+        ifStudentExistWithCredentials.status === UserStatus.DELETED
+      ) {
+        throw new AppError(httpStatus.GONE, "User Is Deleted");
+      }
+
+      const googleName = (googleIdTokenPayload.name ?? "Google User").trim();
+      const nameParts = googleName.split(/\s+/).filter(Boolean);
+      const firstName =
+        googleIdTokenPayload.given_name || nameParts[0] || "Google";
+      const middleName =
+        nameParts.length > 2
+          ? nameParts.slice(1, -1).join(" ")
+          : null;
+      const lastName =
+        googleIdTokenPayload.family_name ||
+        nameParts[nameParts.length - 1] ||
+        "User";
+
+      user = await prisma.user.update({
+        where: {
+          id: ifStudentExistWithCredentials.id,
+        },
+        data: {
+          firstName,
+          middleName,
+          lastName,
+          googleId: googleIdTokenPayload.sub,
+          authProvider: AuthProvider.GOOGLE,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+          imageUrl: googleIdTokenPayload.picture ?? "",
+        },
+      });
+    } else {
+      const googleName = (googleIdTokenPayload.name ?? "Google User").trim();
+      const nameParts = googleName.split(/\s+/).filter(Boolean);
+      const firstName =
+        googleIdTokenPayload.given_name || nameParts[0] || "Google";
+      const middleName =
+        nameParts.length > 2
+          ? nameParts.slice(1, -1).join(" ")
+          : null;
+      const lastName =
+        googleIdTokenPayload.family_name ||
+        nameParts[nameParts.length - 1] ||
+        "User";
+
+      user = await prisma.user.create({
+        data: {
+          firstName,
+          middleName,
+          lastName,
+          email: googleIdTokenPayload.email,
+          role: Role.STUDENT,
+          googleId: googleIdTokenPayload.sub,
+          authProvider: AuthProvider.GOOGLE,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+          imageUrl: googleIdTokenPayload.picture ?? "",
+          status: UserStatus.ACTIVE,
+          studentProfile: {
+            create: {
+              studentIdNo: `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+              status: "ACTIVE",
+            },
+          },
+        },
+        include: { studentProfile: true },
+      });
+
+      const tempatePath = path.join(
+        process.cwd(),
+        "src/app/templates/student-welcome-email.ejs",
+      );
+
+      const templateData = {
+        name: [user.firstName, user.middleName, user.lastName]
+          .filter(Boolean)
+          .join(" "),
+      };
+
+      const html = await ejs.renderFile(tempatePath, templateData);
+
+      await transporter.sendMail({
+        from: config.email_sender,
+        to: user.email,
+        subject: "Welcome To University Mangement System",
+        html,
+      });
+    }
+  }
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+
+  if (user.status === UserStatus.BLOCKED) {
+    throw new AppError(httpStatus.FORBIDDEN, "User Is Blocked");
+  }
+
+  if (user.isDeleted || user.status === UserStatus.DELETED) {
+    throw new AppError(httpStatus.GONE, "User Is Deleted");
+  }
+
+  const jwtPayload = {
+    userId: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+  const refreshToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in as SignOptions,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
 export const AuthService = {
   registerStudent,
   verifyStudentEmail,
@@ -521,4 +721,5 @@ export const AuthService = {
   refreshToken,
   forgotPassword,
   resetPassword,
+  googleLogin,
 };
