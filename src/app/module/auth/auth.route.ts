@@ -35,5 +35,10 @@ router.get(
   AuthController.getMe,
 );
 router.post("/refresh-token", AuthController.refreshToken);
+router.post(
+  "/forgot-password",
+  validateRequest(UserValidation.ForgotPasswordZodSchema),
+  AuthController.forgotPassword,
+);
 
 export const AuthRoutes = router;
