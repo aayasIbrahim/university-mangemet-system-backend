@@ -13,6 +13,7 @@ import {
   ILoginUserPayload,
   IRegisterStudentPayload,
   IRequestUser,
+  IResetPasswordPayload,
   IVerifyEmailPayload,
 } from "./auth.interface";
 import { prisma } from "../../lib/prisma";
@@ -302,7 +303,6 @@ const getMe = async (user: IRequestUser) => {
     },
     include: {
       studentProfile: true,
-      
     },
     omit: {
       password: true,
@@ -322,7 +322,8 @@ const refreshToken = async (token: string) => {
   );
 
   if (!verifiedRefreshToken.success || !verifiedRefreshToken.data) {
-    throw new AppError(httpStatus.UNAUTHORIZED,
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
       config.node_env === "development"
         ? verifiedRefreshToken.error
         : "Invalid refresh token",
@@ -336,10 +337,13 @@ const refreshToken = async (token: string) => {
   });
 
   if (!user || user.isDeleted || user.status !== UserStatus.ACTIVE) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "User is inactive or not found");
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "User is inactive or not found",
+    );
   }
 
-   const jwtPayload = {
+  const jwtPayload = {
     userId: user.id,
     fristName: user.firstName,
     lastName: user.lastName,
@@ -410,10 +414,11 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
     process.cwd(),
     "src/app/templates/forgot-password.ejs",
   );
- 
 
   const templateData = {
-    name: [isUserExist.firstName,isUserExist.middleName,isUserExist.lastName].filter(Boolean).join(""),
+    name: [isUserExist.firstName, isUserExist.middleName, isUserExist.lastName]
+      .filter(Boolean)
+      .join(""),
     otp,
     expirationMinutes: expirationSeconds / 60,
   };
@@ -429,12 +434,91 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
     html,
   });
 };
+const resetPassword = async (payload: IResetPasswordPayload) => {
+  const { email, otp, newPassword } = payload;
 
+  const isUserExist = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Does Not Exist!");
+  }
+
+  if (isUserExist.status === "BLOCKED") {
+    throw new AppError(httpStatus.FORBIDDEN, "User is Blocked");
+  }
+
+  if (!isUserExist.emailVerified) {
+    throw new AppError(httpStatus.FORBIDDEN, "User Not Verified");
+  }
+
+  if (isUserExist.isDeleted || isUserExist.status === "DELETED") {
+    throw new AppError(httpStatus.GONE, "User is Deleted");
+  }
+
+  if (isUserExist.googleId && isUserExist.authProvider === "GOOGLE") {
+    throw new AppError(httpStatus.CONFLICT, "User Has Account With Google");
+  }
+
+  const key = `forgor-password-otp:${isUserExist.email}`;
+
+  const redisOtp = await redisClient.get(key);
+
+  if (!redisOtp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP");
+  }
+
+  if (redisOtp !== otp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "OTP Does Not Match");
+  }
+
+  const hashedNewPassword = await bcrypt.hash(
+    newPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+
+  await prisma.user.update({
+    where: {
+      email: isUserExist.email,
+    },
+    data: {
+      password: hashedNewPassword,
+    },
+  });
+
+  await redisClient.del([key]);
+
+  const tempatePath = path.join(
+    process.cwd(),
+    "src/app/templates/reset-password-success.ejs",
+  );
+
+  const templateData = {
+    name: [isUserExist.firstName, isUserExist.middleName, isUserExist.lastName]
+      .filter(Boolean)
+      .join(""),
+  };
+
+  const html = await ejs.renderFile(tempatePath, templateData);
+
+  await transporter.sendMail({
+    from: config.email_sender,
+    to: isUserExist.email,
+    subject: "Password Changed",
+    // text : `Your OTP is ${otp}`
+    // html: `<h1>Your Password Is Changed</h1>`
+    html,
+  });
+};
 export const AuthService = {
   registerStudent,
   verifyStudentEmail,
   loginUser,
   getMe,
   refreshToken,
-  forgotPassword
+  forgotPassword,
+  resetPassword,
 };
