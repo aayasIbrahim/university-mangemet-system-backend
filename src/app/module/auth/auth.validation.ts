@@ -54,9 +54,13 @@ const StudentRegistrationZodSchema = z.object({
     .optional()
     .or(z.literal("")),
 
-  student: StudentProfileSchema,
+  student: StudentProfileSchema.optional(),
 });
-
+const StudentEmailVerifyZodSchema = z.object({
+  email: z.email("Not email!!"),
+  otp: z.string().length(6),
+});
 export const UserValidation = {
   StudentRegistrationZodSchema,
+  StudentEmailVerifyZodSchema,
 };

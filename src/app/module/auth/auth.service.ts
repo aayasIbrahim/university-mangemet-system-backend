@@ -75,6 +75,8 @@ const registerStudent = async (payload: IRegisterStudentPayload) => {
       },
     },
   );
+   const redisStudentData = await redisClient.get(studentRegistrationKey);
+   console.log(redisStudentData)
 
   const tempatePath = path.join(
     process.cwd(),
@@ -146,7 +148,7 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
   const createdUser = await prisma.user.create({
     data: {
       firstName: studentPayload.firstName,
-      middleName: studentPayload.middleName,
+      middleName: studentPayload.middleName || null,
       lastName: studentPayload.lastName,
       email: studentPayload.email,
       password: studentPayload.password,
@@ -154,10 +156,11 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
       status: UserStatus.ACTIVE,
       phone: studentPayload.phone,
       emailVerified: true,
+      emailVerifiedAt:new Date(),
       studentProfile: {
         create: {
-          studentIdNo: studentPayload.student.studentIdNo,
-          status: studentPayload.student.status,
+          studentIdNo: studentPayload.student.studentIdNo || `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          status: studentPayload?.student.status|| "ACTIVE",
           batch: studentPayload.student.batch,
           program: studentPayload.student.program,
           department: studentPayload.student.department,
@@ -179,9 +182,9 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
   );
 
   const templateData = {
-    fristName: createdUser.firstName,
-    middleName: createdUser.middleName || "",
-    lastName: createdUser.lastName,
+    name: [createdUser.firstName, createdUser.middleName, createdUser.lastName]
+      .filter(Boolean)
+      .join(" "),
   };
 
   const html = await ejs.renderFile(tempatePath, templateData);

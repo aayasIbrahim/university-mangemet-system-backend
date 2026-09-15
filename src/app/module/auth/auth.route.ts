@@ -13,5 +13,10 @@ router.post(
   validateRequest(UserValidation.StudentRegistrationZodSchema),
   AuthController.registerStudent,
 );
+router.post(
+  "/verify-email",
+  validateRequest(UserValidation.StudentEmailVerifyZodSchema),
+  AuthController.verifyStudentEmail,
+);
 
 export const AuthRoutes = router;
