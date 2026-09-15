@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { Role } from "../../../generated/prisma/enums";
 import { auth } from "../../middleware/checkAuth";
-
 import { AuthController } from "./auth.controller";
 import { UserValidation } from "./auth.validation";
 import { validateRequest } from "../../middleware/validateReques";
@@ -35,5 +34,6 @@ router.get(
   ),
   AuthController.getMe,
 );
+router.post("/refresh-token", AuthController.refreshToken);
 
 export const AuthRoutes = router;

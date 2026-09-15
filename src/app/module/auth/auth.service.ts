@@ -17,7 +17,7 @@ import {
 import { prisma } from "../../lib/prisma";
 import { Role, UserStatus } from "../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
-import { SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
 
 const registerStudent = async (payload: IRegisterStudentPayload) => {
   const {
@@ -314,11 +314,60 @@ const getMe = async (user: IRequestUser) => {
 
   return isUserExists;
 };
+const refreshToken = async (token: string) => {
+  const verifiedRefreshToken = jwtUtils.verifyToken(
+    token,
+    config.jwt_refresh_secret,
+  );
 
+  if (!verifiedRefreshToken.success || !verifiedRefreshToken.data) {
+    throw new AppError(httpStatus.UNAUTHORIZED,
+      config.node_env === "development"
+        ? verifiedRefreshToken.error
+        : "Invalid refresh token",
+    );
+  }
+
+  const data = verifiedRefreshToken.data as JwtPayload;
+
+  const user = await prisma.user.findUnique({
+    where: { id: data.userId },
+  });
+
+  if (!user || user.isDeleted || user.status !== UserStatus.ACTIVE) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "User is inactive or not found");
+  }
+
+   const jwtPayload = {
+    userId: user.id,
+    fristName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+  const refreshToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in as SignOptions,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
 
 export const AuthService = {
   registerStudent,
   verifyStudentEmail,
   loginUser,
-  getMe
+  getMe,
+  refreshToken
 };
