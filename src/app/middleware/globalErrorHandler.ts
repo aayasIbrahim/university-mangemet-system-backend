@@ -5,13 +5,13 @@ import config from "../config";
 import { AppError } from "../utils/AppError";
 
 export const globalErrorHandler = async (
-	err: any,
+ err: any,
 	_req: Request,
 	res: Response,
 	_next: NextFunction,
 ) => {
 	if (config.node_env === "development") {
-		console.log("Error from Global Error Handler", err);
+		console.error("Error from Global Error Handler", err);
 	}
 
 	let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;

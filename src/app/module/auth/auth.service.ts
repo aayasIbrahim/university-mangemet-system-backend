@@ -8,7 +8,11 @@ import ejs from "ejs";
 import { transporter } from "../../lib/nodemailer";
 import httpStatus from "http-status";
 import { AppError } from "../../utils/AppError";
-import { IRegisterStudentPayload, IVerifyEmailPayload } from "./auth.interface";
+import {
+  ILoginUserPayload,
+  IRegisterStudentPayload,
+  IVerifyEmailPayload,
+} from "./auth.interface";
 import { prisma } from "../../lib/prisma";
 import { Role, UserStatus } from "../../../generated/prisma/enums";
 import { jwtUtils } from "../../utils/jwt";
@@ -75,8 +79,8 @@ const registerStudent = async (payload: IRegisterStudentPayload) => {
       },
     },
   );
-   const redisStudentData = await redisClient.get(studentRegistrationKey);
-   console.log(redisStudentData)
+  const redisStudentData = await redisClient.get(studentRegistrationKey);
+  console.log(redisStudentData);
 
   const tempatePath = path.join(
     process.cwd(),
@@ -156,11 +160,13 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
       status: UserStatus.ACTIVE,
       phone: studentPayload.phone,
       emailVerified: true,
-      emailVerifiedAt:new Date(),
+      emailVerifiedAt: new Date(),
       studentProfile: {
         create: {
-          studentIdNo: studentPayload.student.studentIdNo || `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-          status: studentPayload?.student.status|| "ACTIVE",
+          studentIdNo:
+            studentPayload.student.studentIdNo ||
+            `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          status: studentPayload?.student.status || "ACTIVE",
           batch: studentPayload.student.batch,
           program: studentPayload.student.program,
           department: studentPayload.student.department,
@@ -226,8 +232,70 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
     refreshToken,
   };
 };
+const loginUser = async (payload: ILoginUserPayload) => {
+  const { password } = payload;
+  const email = payload.email.trim().toLowerCase();
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  if (user.status === UserStatus.BLOCKED) {
+    throw new AppError(httpStatus.FORBIDDEN, "User is blocked");
+  }
+
+  if (user.isDeleted || user.status === UserStatus.DELETED) {
+    throw new AppError(httpStatus.GONE, "User is deleted");
+  }
+
+  if (user.password === null && user.googleId !== null) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "User Already Has Account Registered With Google. Try To Login With Google.",
+    );
+  }
+
+  const isPasswordMatched = await bcrypt.compare(
+    password,
+    user.password as string,
+  );
+
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+  }
+
+  const jwtPayload = {
+    userId: user.id,
+    fristName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as SignOptions,
+  );
+
+  const refreshToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in as SignOptions,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
 
 export const AuthService = {
   registerStudent,
   verifyStudentEmail,
+  loginUser,
 };
