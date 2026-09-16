@@ -16,6 +16,12 @@ enum AuthProvider {
   GOOGLE
   CREDENTIAL
 }
+enum ProgramType {
+  UNDERGRADUATE
+  GRADUATE
+  POSTGRADUATE
+  DIPLOMA
+}
 enum EnrollmentStatus {
   ACTIVE
   SUSPENDED
