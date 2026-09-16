@@ -1,0 +1,32 @@
+model Course {
+  id           String     @id @default(uuid()) @db.Uuid
+  code         String     @unique @db.VarChar(20) // e.g., "CSE-101", "EEE-2101"
+  title        String     @db.VarChar(150)
+  credits      Float      @default(3.0)
+  type         CourseType @default(CORE)
+  isActive     Boolean    @default(true)
+  
+
+  isDeleted    Boolean    @default(false)
+  deletedAt    DateTime?
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+
+  departmentId String     @db.Uuid
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  
+  programId    String     @db.Uuid
+  program      Program    @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  // (একটি কোর্সের আন্ডারে একাধিক প্রি-রিকুয়েজিট কোর্স থাকতে পারে)
+  prerequisites       CoursePrerequisite[] @relation("CourseToPrerequisite")
+  prerequisiteFor     CoursePrerequisite[] @relation("PrerequisiteToCourse")
+
+  @@index([departmentId])
+  @@index([programId])
+  @@index([isActive])
+  @@index([isDeleted])
+  @@map("courses")
+}

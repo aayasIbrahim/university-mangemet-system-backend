@@ -28,6 +28,11 @@ enum EnrollmentStatus {
   GRADUATED
   WITHDRAWN
 }
+enum CourseType {
+  CORE
+  ELECTIVE
+  NON_CREDIT
+}
 
 enum AttendanceStatus {
   PRESENT

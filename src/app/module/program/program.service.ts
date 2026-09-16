@@ -1,12 +1,12 @@
-import { ProgramWhereInput } from "./../../../generated/prisma/internal/prismaNamespace";
-import { IQuery } from "./../../interfaces/index";
+import { ProgramWhereInput } from "../../../generated/prisma/internal/prismaNamespace";
+import { IQuery } from "../../interfaces/index";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import {
   ICreateProgramPayload,
   IUpdateProgramPayload,
-} from "./programe.interface";
+} from "./program.interface";
 
 const createProgram = async (payload: ICreateProgramPayload) => {
   const {

@@ -14,6 +14,7 @@ model Program {
   departmentId String     @db.Uuid
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   students     StudentProfile[]
+  cousrse     Course[]
   @@unique([departmentId, name])
   @@index([departmentId])
   @@index([isActive])

@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
-import { ProgramService } from "./programe.service";
+import { ProgramService } from "./program.service";
 import { sendResponse } from "../../utils/sendResponse";
 
 const createProgram = catchAsync(async (req: Request, res: Response) => {

@@ -11,7 +11,7 @@ model Department {
   adminId     String?   @unique  @db.Uuid
   admin       User?     @relation("DepartmentAdmin", fields: [adminId], references: [id], onDelete:Cascade, onUpdate: Cascade)
   programs    Program[]
-
+  courses     Course[]
   @@index([isActive])
   @@map("departments")
 }
