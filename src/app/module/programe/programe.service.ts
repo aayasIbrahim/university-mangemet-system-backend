@@ -1,7 +1,4 @@
-import {
-  Payload,
-  ProgramWhereInput,
-} from "./../../../generated/prisma/internal/prismaNamespace";
+import { ProgramWhereInput } from "./../../../generated/prisma/internal/prismaNamespace";
 import { IQuery } from "./../../interfaces/index";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
@@ -22,7 +19,7 @@ const createProgram = async (payload: ICreateProgramPayload) => {
     type,
   } = payload;
 
-  const isDepartmentExist = await prisma.department.findUnique({
+  const isDepartmentExist = await prisma.department.findFirst({
     where: { id: departmentId, isDeleted: false },
   });
 
@@ -127,7 +124,7 @@ const getAllPrograms = async (query: IQuery) => {
 };
 
 const getSingleProgram = async (programId: string) => {
-  const program = await prisma.program.findUnique({
+  const program = await prisma.program.findFirst({
     where: { id: programId, isDeleted: false },
     include: {
       department: {
@@ -150,7 +147,7 @@ const updateProgram = async (
   programId: string,
   payload: IUpdateProgramPayload,
 ) => {
-  const isProgramExist = await prisma.program.findUnique({
+  const isProgramExist = await prisma.program.findFirst({
     where: { id: programId, isDeleted: false },
   });
 
@@ -163,8 +160,6 @@ const updateProgram = async (
 
   const { name, degree, durationYears, description, totalCredits, type } =
     payload;
-  isProgramExist.departmentId;
-
   if (name) {
     const activeName = name ? name.trim() : isProgramExist.name;
 
@@ -195,6 +190,7 @@ const updateProgram = async (
       totalCredits,
       type,
       durationYears,
+      isActive: payload.isActive,
     },
     include: {
       department: {
@@ -205,12 +201,15 @@ const updateProgram = async (
 };
 
 const deleteProgram = async (id: string) => {
-  const program = await prisma.program.findUnique({
+  const program = await prisma.program.findFirst({
     where: { id, isDeleted: false },
   });
 
   if (!program) {
-    throw new AppError(httpStatus.NOT_FOUND, "Target program does not exist or has already been soft-deleted.");
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Target program does not exist or has already been soft-deleted.",
+    );
   }
 
   return await prisma.program.update({
@@ -228,5 +227,5 @@ export const ProgramService = {
   getAllPrograms,
   getSingleProgram,
   updateProgram,
-  deleteProgram
+  deleteProgram,
 };

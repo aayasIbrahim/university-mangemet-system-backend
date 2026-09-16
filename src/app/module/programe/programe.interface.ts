@@ -8,6 +8,7 @@ export interface ICreateProgramPayload {
   totalCredits: number; 
   type: ProgramType;    
   departmentId: string;
+  isActive?: boolean;
 }
 
 export type IUpdateProgramPayload = Omit<Partial<ICreateProgramPayload>, 'departmentId'>;

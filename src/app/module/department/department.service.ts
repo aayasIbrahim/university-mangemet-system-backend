@@ -1,4 +1,3 @@
-import { Department } from "./../../../generated/prisma/browser";
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { RequestUser } from "../../middleware/checkAuth";
@@ -126,9 +125,10 @@ const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
 };
 const getSingleDepartment = async (departmentId: string) => {
     
-  const department = await prisma.department.findUnique({
+  const department = await prisma.department.findFirst({
     where: {
       id: departmentId,
+      isDeleted: false,
     },
     include: {
       programs: true,

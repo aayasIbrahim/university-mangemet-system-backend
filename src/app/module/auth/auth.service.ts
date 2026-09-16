@@ -181,7 +181,9 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
             `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
           status: studentPayload?.student.status || "ACTIVE",
           batch: studentPayload.student.batch,
-          program: studentPayload.student.program,
+          program: studentPayload.student.program
+            ? { connect: { id: studentPayload.student.program } }
+            : undefined,
           department: studentPayload.student.department,
           semester: studentPayload.student.semester,
           address: studentPayload.student.address,
