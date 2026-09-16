@@ -85,37 +85,35 @@ const getAllDepartments = async (query: IQuery) => {
   }
 
   andConditions.push({ isDeleted: false });
-
-  const allDepartment = await prisma.department.findMany({
-    where: {
-      AND: andConditions.length > 0 ? andConditions : undefined,
-    },
-
+const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
+ const [allDepartment, totalDepartmentCount] = await Promise.all([
+  prisma.department.findMany({
+    where: whereConditions,
     take: limit,
     skip: skip,
-
     orderBy: {
-      // sortBy : sortOrder
       [sortBy]: sortOrder,
     },
-
     include: {
       admin: {
-        omit: {
-          password: true,
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          imageUrl: true,
+          
         },
       },
-
       programs: true,
     },
-  });
-
-  const totalDepartmentCount = await prisma.department.count({
-    where: {
-      AND: andConditions,
-    },
-  });
-
+  }),
+  
+  prisma.department.count({
+    where: whereConditions,
+  }),
+]);
   return {
     data: allDepartment,
     meta: {

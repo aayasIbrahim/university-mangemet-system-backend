@@ -54,7 +54,10 @@ const registerStudent = async (payload: IRegisterStudentPayload) => {
     );
   }
 
-  const hashedPassword = await bcrypt.hash(password, 8);
+  const hashedPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds),
+  );
 
   const expirationSeconds = 5 * 60;
 
@@ -594,9 +597,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
       const firstName =
         googleIdTokenPayload.given_name || nameParts[0] || "Google";
       const middleName =
-        nameParts.length > 2
-          ? nameParts.slice(1, -1).join(" ")
-          : null;
+        nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : null;
       const lastName =
         googleIdTokenPayload.family_name ||
         nameParts[nameParts.length - 1] ||
@@ -623,9 +624,7 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
       const firstName =
         googleIdTokenPayload.given_name || nameParts[0] || "Google";
       const middleName =
-        nameParts.length > 2
-          ? nameParts.slice(1, -1).join(" ")
-          : null;
+        nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : null;
       const lastName =
         googleIdTokenPayload.family_name ||
         nameParts[nameParts.length - 1] ||

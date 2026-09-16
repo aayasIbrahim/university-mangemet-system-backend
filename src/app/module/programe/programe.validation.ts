@@ -38,7 +38,8 @@ const CreateProgramZodSchema = z.object({
     .uuid("Invalid Department ID format"),
 });
 
-const UpdateProgramZodSchema = CreateProgramZodSchema.partial();
+const UpdateProgramZodSchema = CreateProgramZodSchema.partial().omit({ departmentId: true });
+
 
 export const ProgramValidation = {
   CreateProgramZodSchema,

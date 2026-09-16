@@ -16,6 +16,7 @@ import { notFound } from "./app/middleware/notFound";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { DepartmentRoutes } from "./app/module/department/department.route";
+import { ProgramRoutes } from "./app/module/programe/programe.route";
 
 
 
@@ -37,6 +38,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/user", UserRoutes);
 app.use("/api/v1/departments", DepartmentRoutes);
+app.use("/api/v1/program",ProgramRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
