@@ -1,0 +1,19 @@
+model Program {
+  id           String     @id @default(uuid()) @db.Uuid
+  name         String     @db.VarChar(150)
+  code         String     @unique @db.VarChar(30)
+  degree      String?    @db.VarChar(80)
+  durationYears Int?
+  description  String?    @db.Text
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  departmentId String     @db.Uuid
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([departmentId, name])
+  @@index([departmentId])
+  @@index([isActive])
+  @@map("programs")
+}

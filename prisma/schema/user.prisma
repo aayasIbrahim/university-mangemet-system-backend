@@ -21,7 +21,7 @@ model User {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   studentProfile      StudentProfile?
-
+  departmentAdmin      Department?     @relation("DepartmentAdmin")
   @@index([role])
   @@index([isActive])
   @@index([status])
