@@ -127,6 +127,7 @@ const getAllDepartments = async (query: IQuery) => {
   };
 };
 const getSingleDepartment = async (departmentId: string) => {
+    
   const department = await prisma.department.findUnique({
     where: {
       id: departmentId,

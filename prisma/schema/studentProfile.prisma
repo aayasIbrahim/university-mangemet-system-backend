@@ -4,7 +4,6 @@ model StudentProfile {
   status         EnrollmentStatus @default(ACTIVE)
   enrollmentDate DateTime         @default(now())
   batch          String?          @db.VarChar(50)
-  program        String?          @db.VarChar(120)
   department     String?          @db.VarChar(120)
   semester       Int?
   address        String?          @db.Text
@@ -16,9 +15,12 @@ model StudentProfile {
 
   userId         String           @unique @db.Uuid
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  programId      String?              @unique  @db.Uuid
+  programs      Program?         @relation(fields: [programId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([status])
   @@index([studentIdNo])
   @@index([isDeleted])
+  @@index([programId])
   @@map("student_profiles")
 }

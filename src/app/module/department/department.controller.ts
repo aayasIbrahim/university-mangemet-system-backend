@@ -30,8 +30,11 @@ const getAllDepartments = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const getSingleDepartment = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const result = await DepartmentService.getSingleDepartment(id as string);
+  const { departmentId } = req.params;
+
+  const result = await DepartmentService.getSingleDepartment(
+    departmentId as string,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -42,11 +45,11 @@ const getSingleDepartment = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateDepartment = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { departmentId } = req.params;
   const payload = req.body;
 
   const result = await DepartmentService.updateDepartment(
-    id as string,
+    departmentId as string,
     payload,
   );
 
@@ -58,8 +61,8 @@ const updateDepartment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const deleteDepartment = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  await DepartmentService.deleteDepartment(id as string);
+  const { departmentId } = req.params;
+  await DepartmentService.deleteDepartment(departmentId as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -72,6 +75,7 @@ const deleteDepartment = catchAsync(async (req: Request, res: Response) => {
 const getDepartmentPrograms = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
+
     const result = await DepartmentService.getDepartmentPrograms(id as string);
 
     sendResponse(res, {
