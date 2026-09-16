@@ -5,10 +5,9 @@ export interface ICreateProgramPayload {
   degree?: string | null;
   durationYears?: number | null;
   description?: string | null;
-  totalCredits: number; // Optional if you want to fall back to the schema's 120 default
-  type?: ProgramType;    // Optional if you want to fall back to UNDERGRADUATE default
-  isActive?: boolean;
+  totalCredits: number; 
+  type: ProgramType;    
   departmentId: string;
 }
 
-export type IUpdateProgramPayload = Partial<ICreateProgramPayload>
+export type IUpdateProgramPayload = Omit<Partial<ICreateProgramPayload>, 'departmentId'>;

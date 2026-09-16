@@ -127,7 +127,7 @@ const seedRoleUser = async (user: {
 }) => {
   const hashedPassword = await bcrypt.hash(
     user.password,
-    Number(config.bcrypt_salt_rounds) || 10,
+    Number(config.bcrypt_salt_rounds) ,
   );
 
   return prisma.user.upsert({
