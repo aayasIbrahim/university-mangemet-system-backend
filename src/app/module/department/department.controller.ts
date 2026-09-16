@@ -2,7 +2,6 @@ import type { Request, Response } from "express";
 import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { AppError } from "../../utils/AppError";
 import { DepartmentService } from "./department.service";
 
 const createDepartment = catchAsync(async (req: Request, res: Response) => {

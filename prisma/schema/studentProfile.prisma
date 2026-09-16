@@ -15,8 +15,8 @@ model StudentProfile {
 
   userId         String           @unique @db.Uuid
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  programId      String?              @unique  @db.Uuid
-  programs      Program?         @relation(fields: [programId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  programId      String?              @db.Uuid
+  program        Program?         @relation(fields: [programId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([status])
   @@index([studentIdNo])
