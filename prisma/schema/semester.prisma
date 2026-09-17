@@ -1,0 +1,24 @@
+model Semester {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(30)         
+  code      String   @unique @db.VarChar(10)  
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+  
+  
+  isActive   Boolean   @default(true)
+  isDeleted  Boolean   @default(false)
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  sections         Section[]
+  courses          Course[]
+//   transcripts      Transcript[]
+//   invoices         Invoice[]
+//   academicReports  AcademicReport[]
+
+  @@index([isCurrent, isDeleted])
+  @@map("semesters")
+}

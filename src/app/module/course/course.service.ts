@@ -37,8 +37,16 @@ const validatePrerequisites = async (
 };
 
 const createCourse = async (payload: ICoursePayload) => {
-  const { code, title, credits, type, departmentId, programId, prerequisites } =
-    payload;
+  const {
+    code,
+    title,
+    credits,
+    type,
+    departmentId,
+    semesterId,
+    programId,
+    prerequisites,
+  } = payload;
 
   const isCodeExist = await prisma.course.findFirst({
     where: {
@@ -53,9 +61,12 @@ const createCourse = async (payload: ICoursePayload) => {
     );
   }
 
-  const [isDeptExist, isProgramValid] = await Promise.all([
+  const [isDeptExist, isSemesterValid, isProgramValid] = await Promise.all([
     prisma.department.findUnique({
       where: { id: departmentId, isDeleted: false },
+    }),
+    prisma.semester.findFirst({
+      where: { id: semesterId, isActive: true, isDeleted: false },
     }),
     prisma.program.findFirst({
       where: {
@@ -67,6 +78,11 @@ const createCourse = async (payload: ICoursePayload) => {
   ]);
   if (!isDeptExist)
     throw new AppError(httpStatus.NOT_FOUND, "Target Department not found.");
+  if (!isSemesterValid)
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Target Semester not found or is inactive.",
+    );
   if (!isProgramValid)
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -83,6 +99,7 @@ const createCourse = async (payload: ICoursePayload) => {
         credits,
         type,
         departmentId,
+        semesterId,
         programId,
       },
     });
@@ -101,6 +118,7 @@ const createCourse = async (payload: ICoursePayload) => {
       where: { id: newCourse.id },
       include: {
         department: { select: { id: true, name: true, code: true } },
+        semester: { select: { id: true, name: true, code: true } },
         program: { select: { id: true, name: true, code: true } },
         prerequisites: {
           include: {
@@ -134,6 +152,7 @@ const getAllCourses = async (query: IQuery) => {
 
   if (query.departmentId)
     andConditions.push({ departmentId: query.departmentId });
+  if (query.semesterId) andConditions.push({ semesterId: query.semesterId });
   if (query.programId) andConditions.push({ programId: query.programId });
   if (query.type) andConditions.push({ type: query.type as any });
 
@@ -147,6 +166,7 @@ const getAllCourses = async (query: IQuery) => {
       orderBy: { [sortBy]: sortOrder },
       include: {
         department: { select: { id: true, code: true } },
+        semester: { select: { id: true, name: true, code: true } },
         program: { select: { id: true, code: true } },
         prerequisites: {
           include: {
@@ -174,6 +194,7 @@ const getSingleCourse = async (courseId: string) => {
     where: { id: courseId, isDeleted: false },
     include: {
       department: { select: { id: true, name: true, code: true } },
+      semester: { select: { id: true, name: true, code: true } },
       program: { select: { id: true, name: true, code: true } },
       prerequisites: {
         include: {
@@ -202,7 +223,7 @@ const updateCourse = async (
       "Target course not found to modify.",
     );
 
-  const { code, title, prerequisites, ...remainingData } = payload;
+  const { code, title, semesterId, prerequisites, ...remainingData } = payload;
 
   if (code) {
     const duplicateCheck = await prisma.course.findFirst({
@@ -233,6 +254,19 @@ const updateCourse = async (
       throw new AppError(
         httpStatus.CONFLICT,
         "Another course with this title already exists in the program.",
+      );
+    }
+  }
+
+  if (semesterId) {
+    const isSemesterValid = await prisma.semester.findFirst({
+      where: { id: semesterId, isActive: true, isDeleted: false },
+    });
+
+    if (!isSemesterValid) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "Target Semester not found or is inactive.",
       );
     }
   }
@@ -274,10 +308,12 @@ const updateCourse = async (
       data: {
         code: code?.trim().toUpperCase(),
         title: title?.trim(),
+        semesterId,
         ...remainingData,
       },
       include: {
         department: { select: { id: true, name: true, code: true } },
+        semester: { select: { id: true, name: true, code: true } },
         program: { select: { id: true, name: true, code: true } },
         prerequisites: {
           include: {

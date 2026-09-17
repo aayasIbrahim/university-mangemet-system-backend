@@ -1,0 +1,30 @@
+
+model Section {
+  id           String             @id @default(uuid()) @db.Uuid
+  sectionName  String             @db.VarChar(20) // e.g., "Section A"
+  capacity     Int                @default(40)
+  
+
+  isActive     Boolean            @default(true)
+  isDeleted    Boolean            @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  courseId     String             @db.Uuid
+  course       Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  semesterId   String             @db.Uuid
+  semester     Semester           @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  
+  // instructorId String?            @db.Uuid
+  // instructor   InstructorProfile? @relation(fields: [instructorId], references: [id])
+
+  // enrollments   CourseEnrollment[]
+  // classSessions ClassSession[]
+  // exams         Exam[]
+
+  @@unique([courseId, semesterId, sectionName])
+  @@index([semesterId, isDeleted]) 
+  @@map("sections")
+}

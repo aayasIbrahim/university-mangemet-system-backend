@@ -18,6 +18,8 @@ import { UserRoutes } from "./app/module/user/user.route";
 import { DepartmentRoutes } from "./app/module/department/department.route";
 import { ProgramRoutes } from "./app/module/program/program.route";
 import { CourseRoutes } from "./app/module/course/course,route";
+import { SemesterRoutes } from "./app/module/semester/semester.route";
+import { SectionRoutes } from "./app/module/section/section.route";
 
 const app: Application = express();
 
@@ -39,6 +41,8 @@ app.use("/api/v1/user", UserRoutes);
 app.use("/api/v1/departments", DepartmentRoutes);
 app.use("/api/v1/program", ProgramRoutes);
 app.use("/api/v1/course", CourseRoutes);
+app.use("/api/v1/semester", SemesterRoutes);
+app.use("/api/v1/section", SectionRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

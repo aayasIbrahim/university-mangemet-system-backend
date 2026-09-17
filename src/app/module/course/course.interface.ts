@@ -6,6 +6,7 @@ export interface ICoursePayload {
   credits: number;
   type: CourseType,
   departmentId: string;
+  semesterId: string;
   programId: string;
   prerequisites?: string[]; 
 }
