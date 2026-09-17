@@ -1,7 +1,7 @@
 import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
-import { ICoursePayload } from "./course.interface";
+import { ICoursePayload, IUpdateCoursePayload } from "./course.interface";
 import { CourseWhereInput } from "../../../generated/prisma/models";
 import { IQuery } from "../../interfaces";
 
@@ -136,7 +136,6 @@ const getAllCourses = async (query: IQuery) => {
   };
 };
 
-
 const getSingleCourse = async (courseId: string) => {
   const course = await prisma.course.findUnique({
     where: { id: courseId, isDeleted: false },
@@ -155,126 +154,142 @@ const getSingleCourse = async (courseId: string) => {
   return course;
 };
 
-// /**
-//  * 4. Update Course Details & Prerequisite Relations Diffing Engine
-//  */
-// const updateCourse = async (id: string, payload: IUpdateCoursePayload) => {
-//   const isCourseExist = await prisma.course.findUnique({
-//     where: { id, isDeleted: false },
-//     include: { prerequisites: true },
-//   });
+const updateCourse = async (
+  courseId: string,
+  payload: IUpdateCoursePayload,
+) => {
+  const isCourseExist = await prisma.course.findUnique({
+    where: { id: courseId, isDeleted: false },
+    include: { prerequisites: true },
+  });
 
-//   if (!isCourseExist) throw new AppError(httpStatus.NOT_FOUND, "Target course not found to modify.");
+  if (!isCourseExist)
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Target course not found to modify.",
+    );
 
-//   const { code, title, prerequisites, ...remainingData } = payload;
+  const { code, title, prerequisites, ...remainingData } = payload;
 
-//   // Real-Life Guard: Handle code modifications safely
-//   if (code) {
-//     const duplicateCheck = await prisma.course.findFirst({
-//       where: { id: { not: id }, code: { equals: code.trim(), mode: "insensitive" }, isDeleted: false },
-//     });
-//     if (duplicateCheck) throw new AppError(httpStatus.CONFLICT, "Another course with this code already exists.");
-//   }
+  if (code) {
+    const duplicateCheck = await prisma.course.findFirst({
+      where: {
+        id: { not: courseId },
+        code: { equals: code.trim(), mode: "insensitive" },
+        isDeleted: false,
+      },
+    });
+    if (duplicateCheck)
+      throw new AppError(
+        httpStatus.CONFLICT,
+        "Another course with this code already exists.",
+      );
+  }
 
-//   return await prisma.\$transaction(async (tx) => {
-//     // 🔄 Dynamic Prerequisite Diff Engine
-//     if (prerequisites !== undefined) {
-//       // Catch real-life loop error: A course cannot be its own prerequisite
-//       if (prerequisites.includes(id)) {
-//         throw new AppError(httpStatus.BAD_REQUEST, "A course cannot have itself listed as a prerequisite.");
-//       }
+  return await prisma.$transaction(async (tx) => {
+    if (prerequisites !== undefined) {
+      if (prerequisites.includes(courseId)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "A course cannot have itself listed as a prerequisite.",
+        );
+      }
 
-//       const existingPrereqIds = isCourseExist.prerequisites.map((p) => p.prerequisiteId);
+      const existingPrereqIds = isCourseExist.prerequisites.map(
+        (p) => p.prerequisiteId,
+      );
 
-//       // Filter arrays down into target diff operations
-//       const toLink = prerequisites.filter((pid) => !existingPrereqIds.includes(pid));
-//       const toUnlink = existingPrereqIds.filter((pid) => !prerequisites.includes(pid));
+      const toLink = prerequisites.filter(
+        (pid) => !existingPrereqIds.includes(pid),
+      );
+      const toUnlink = existingPrereqIds.filter(
+        (pid) => !prerequisites.includes(pid),
+      );
 
-//       // Remove unlinked items
-//       if (toUnlink.length > 0) {
-//         await tx.coursePrerequisite.deleteMany({
-//           where: { courseId: id, prerequisiteId: { in: toUnlink } },
-//         });
-//       }
+      if (toUnlink.length > 0) {
+        await tx.coursePrerequisite.deleteMany({
+          where: { courseId, prerequisiteId: { in: toUnlink } },
+        });
+      }
 
-//       // Append newly linked elements
-//       if (toLink.length > 0) {
-//         await tx.coursePrerequisite.createMany({
-//           data: toLink.map((pid) => ({ courseId: id, prerequisiteId: pid })),
-//         });
-//       }
-//     }
+      if (toLink.length > 0) {
+        await tx.coursePrerequisite.createMany({
+          data: toLink.map((pid) => ({ courseId, prerequisiteId: pid })),
+        });
+      }
+    }
 
-//     // Execute standard scalar parameter upgrades
-//     return await tx.course.update({
-//       where: { id },
-//       data: {
-//         code: code?.trim().toUpperCase(),
-//         title: title?.trim(),
-//         ...remainingData,
-//       },
-//       include: {
-//         department: { select: { id: true, name: true, code: true } },
-//         program: { select: { id: true, name: true, code: true } },
-//         prerequisites: { include: { prerequisite: { select: { id: true, code: true, title: true } } } },
-//       },
-//     });
-//   });
-// };
+    return await tx.course.update({
+      where: { id: courseId },
+      data: {
+        code: code?.trim().toUpperCase(),
+        title: title?.trim(),
+        ...remainingData,
+      },
+      include: {
+        department: { select: { id: true, name: true, code: true } },
+        program: { select: { id: true, name: true, code: true } },
+        prerequisites: {
+          include: {
+            prerequisite: { select: { id: true, code: true, title: true } },
+          },
+        },
+      },
+    });
+  });
+};
 
-// /**
-//  * 5. Soft Delete Course
-//  */
-// const deleteCourse = async (id: string) => {
-//   const isCourseExist = await prisma.course.findUnique({ where: { id, isDeleted: false } });
-//   if (!isCourseExist) throw new AppError(httpStatus.NOT_FOUND, "Target course does not exist.");
+const deleteCourse = async (courseId: string) => {
+  const isCourseExist = await prisma.course.findUnique({
+    where: { id: courseId, isDeleted: false },
+  });
+  if (!isCourseExist)
+    throw new AppError(httpStatus.NOT_FOUND, "Target course does not exist.");
 
-//   return await prisma.course.update({
-//     where: { id },
-//     data: { isDeleted: true, deletedAt: new Date(), isActive: false },
-//   });
-// };
+  return await prisma.course.update({
+    where: { id: courseId },
+    data: { isDeleted: true, deletedAt: new Date(), isActive: false },
+  });
+};
 
-// const getCoursePrerequisites = async (courseId: string) => {
-//   // ১. প্রথমে চেক করা হচ্ছে মেইন কোর্সটি সিস্টেমে আছে কিনা
-//   const isCourseExist = await prisma.course.findUnique({
-//     where: { id: courseId, isDeleted: false },
-//   });
+const getCoursePrerequisites = async (courseId: string) => {
+  const isCourseExist = await prisma.course.findUnique({
+    where: { id: courseId, isDeleted: false },
+  });
 
-//   if (!isCourseExist) {
-//     throw new AppError(StatusCodes.NOT_FOUND, "Target course not found!");
-//   }
+  if (!isCourseExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "Target course not found!");
+  }
 
-//   // ২. প্রি-রিকুয়েজিট টেবিল থেকে ডাটা তুলে আনা হচ্ছে
-//   const prerequisitesData = await prisma.coursePrerequisite.findMany({
-//     where: {
-//       courseId: courseId,
-//       prerequisite: {
-//         isDeleted: false, // ডিলিট হওয়া কোর্স যেন না আসে
-//       },
-//     },
-//     include: {
-//       prerequisite: {
-//         select: {
-//           id: true,
-//           code: true,
-//           title: true,
-//           credits: true,
-//           type: true,
-//           isActive: true,
-//         },
-//       },
-//     },
-//   });
+  const prerequisitesData = await prisma.coursePrerequisite.findMany({
+    where: {
+      courseId: courseId,
+      prerequisite: {
+        isDeleted: false,
+      },
+    },
+    include: {
+      prerequisite: {
+        select: {
+          id: true,
+          code: true,
+          title: true,
+          credits: true,
+          type: true,
+          isActive: true,
+        },
+      },
+    },
+  });
 
-//   // ৩. শুধু প্রি-রিকুয়েজিট কোর্সের অবজেক্টগুলোর অ্যারো ফরম্যাট করে পাঠানো হচ্ছে
-//   return prerequisitesData.map((item) => item.prerequisite);
-// };
+  return prerequisitesData.map((item) => item.prerequisite);
+};
 
 export const CourseService = {
   createCourse,
   getAllCourses,
   getSingleCourse,
-  //   updateCourse,
-  //   deleteCourse,
+  updateCourse,
+  deleteCourse,
+  getCoursePrerequisites,
 };
