@@ -1,5 +1,5 @@
-import { z } from 'zod'; 
-import { CourseType } from '../../../generated/prisma/enums';
+import { z } from "zod";
+import { CourseType } from "../../../generated/prisma/enums";
 
 const CreateCourseZodSchema = z.object({
   code: z
@@ -33,6 +33,9 @@ const CreateCourseZodSchema = z.object({
     
   prerequisites: z
     .array(z.string().uuid("Each prerequisite item must be a valid UUID string"))
+    .refine((items) => new Set(items).size === items.length, {
+      message: "Prerequisite course IDs must be unique",
+    })
     .optional(),
 });
 

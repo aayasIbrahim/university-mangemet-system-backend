@@ -5,6 +5,37 @@ import { ICoursePayload, IUpdateCoursePayload } from "./course.interface";
 import { CourseWhereInput } from "../../../generated/prisma/models";
 import { IQuery } from "../../interfaces";
 
+const validatePrerequisites = async (
+  prerequisites: string[],
+  courseId: string | undefined,
+  programId: string,
+) => {
+  if (courseId && prerequisites.includes(courseId)) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "A course cannot have itself listed as a prerequisite.",
+    );
+  }
+
+  if (prerequisites.length === 0) return;
+
+  const validPrerequisiteCount = await prisma.course.count({
+    where: {
+      id: { in: prerequisites },
+      programId,
+      isActive: true,
+      isDeleted: false,
+    },
+  });
+
+  if (validPrerequisiteCount !== prerequisites.length) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Every prerequisite must be an active course from the same program.",
+    );
+  }
+};
+
 const createCourse = async (payload: ICoursePayload) => {
   const { code, title, credits, type, departmentId, programId, prerequisites } =
     payload;
@@ -42,6 +73,8 @@ const createCourse = async (payload: ICoursePayload) => {
       "Target Program not found or does not belong to this Department.",
     );
 
+  await validatePrerequisites(prerequisites ?? [], undefined, programId);
+
   const transactionResult = await prisma.$transaction(async (tx) => {
     const newCourse = await tx.course.create({
       data: {
@@ -68,7 +101,7 @@ const createCourse = async (payload: ICoursePayload) => {
       where: { id: newCourse.id },
       include: {
         department: { select: { id: true, name: true, code: true } },
-        program: { select: { id: true, name: true } },
+        program: { select: { id: true, name: true, code: true } },
         prerequisites: {
           include: {
             prerequisite: { select: { id: true, code: true, title: true } },
@@ -110,7 +143,7 @@ const getAllCourses = async (query: IQuery) => {
     prisma.course.findMany({
       where: whereConditions,
       take: limit,
-      skip: skip,
+      skip,
       orderBy: { [sortBy]: sortOrder },
       include: {
         department: { select: { id: true, code: true } },
@@ -186,14 +219,31 @@ const updateCourse = async (
       );
   }
 
+  if (title) {
+    const duplicateTitleCheck = await prisma.course.findFirst({
+      where: {
+        id: { not: courseId },
+        programId: isCourseExist.programId,
+        title: { equals: title.trim(), mode: "insensitive" },
+        isDeleted: false,
+      },
+    });
+
+    if (duplicateTitleCheck) {
+      throw new AppError(
+        httpStatus.CONFLICT,
+        "Another course with this title already exists in the program.",
+      );
+    }
+  }
+
   return await prisma.$transaction(async (tx) => {
     if (prerequisites !== undefined) {
-      if (prerequisites.includes(courseId)) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          "A course cannot have itself listed as a prerequisite.",
-        );
-      }
+      await validatePrerequisites(
+        prerequisites,
+        courseId,
+        isCourseExist.programId,
+      );
 
       const existingPrereqIds = isCourseExist.prerequisites.map(
         (p) => p.prerequisiteId,
