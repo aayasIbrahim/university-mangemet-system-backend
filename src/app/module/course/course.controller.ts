@@ -27,20 +27,18 @@ const getAllCourses = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// /**
-//  * 3. Get Single Course By ID
-//  */
-// const getCourseById = catchAsync(async (req: Request, res: Response) => {
-//   const { id } = req.params;
-//   const result = await CourseService.getCourseById(id);
 
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Course detailed profile retrieved successfully!',
-//     data: result,
-//   });
-// });
+const getSingleCourse = catchAsync(async (req: Request, res: Response) => {
+  const { courseId } = req.params;
+  const result = await CourseService.getSingleCourse(courseId as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Course detailed profile retrieved successfully!',
+    data: result,
+  });
+});
 
 // /**
 //  * 4. Update Course Details & Prerequisites
@@ -86,7 +84,7 @@ const getAllCourses = catchAsync(async (req: Request, res: Response) => {
 export const CourseController = {
   createCourse,
   getAllCourses,
-  //   getCourseById,
+ getSingleCourse
   //   updateCourse,
   //   deleteCourse,
 };

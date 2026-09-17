@@ -136,22 +136,24 @@ const getAllCourses = async (query: IQuery) => {
   };
 };
 
-// /**
-//  * 3. Get Single Course by ID (With Deep Prerequisite Graph Mapping)
-//  */
-// const getCourseById = async (id: string) => {
-//   const course = await prisma.course.findUnique({
-//     where: { id, isDeleted: false },
-//     include: {
-//       department: { select: { id: true, name: true, code: true } },
-//       program: { select: { id: true, name: true, code: true } },
-//       prerequisites: { include: { prerequisite: { select: { id: true, code: true, title: true } } } },
-//     },
-//   });
 
-//   if (!course) throw new AppError(httpStatus.NOT_FOUND, "Course not found.");
-//   return course;
-// };
+const getSingleCourse = async (courseId: string) => {
+  const course = await prisma.course.findUnique({
+    where: { id: courseId, isDeleted: false },
+    include: {
+      department: { select: { id: true, name: true, code: true } },
+      program: { select: { id: true, name: true, code: true } },
+      prerequisites: {
+        include: {
+          prerequisite: { select: { id: true, code: true, title: true } },
+        },
+      },
+    },
+  });
+
+  if (!course) throw new AppError(httpStatus.NOT_FOUND, "Course not found.");
+  return course;
+};
 
 // /**
 //  * 4. Update Course Details & Prerequisite Relations Diffing Engine
@@ -271,8 +273,8 @@ const getAllCourses = async (query: IQuery) => {
 
 export const CourseService = {
   createCourse,
-    getAllCourses,
-  //   getCourseById,
+  getAllCourses,
+  getSingleCourse,
   //   updateCourse,
   //   deleteCourse,
 };

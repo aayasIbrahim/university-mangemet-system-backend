@@ -18,14 +18,14 @@ router.post(
 router.get("/all-course", CourseController.getAllCourses);
 
 // // 3. Get a Single Course by ID (Includes its prerequisite graph details)
-// router.get(
-//   "/:id",
-//   CourseController.getCourseById
-// );
+router.get(
+  "/:courseId",
+  CourseController.getSingleCourse
+);
 
 // // 4. Update Course Details (Can dynamically link/unlink prerequisites via nested actions)
 // router.patch(
-//   "/:id",
+  // "/:courseId",
 //   auth("SUPER_ADMIN", "REGISTRAR", "DEPARTMENT_ADMIN"), // Dept heads can update descriptions or credits
 //   validateRequest(CourseValidation.UpdateCourseZodSchema),
 //   CourseController.updateCourse
@@ -33,14 +33,14 @@ router.get("/all-course", CourseController.getAllCourses);
 
 // // 5. Soft Delete a Course
 // router.delete(
-//   "/:id",
+//    "/:courseId",
 //   auth("SUPER_ADMIN"), // Destructive action restricted strictly to Super Admin
 //   CourseController.deleteCourse
 // );
 
 // // 6. [Advanced Specialty Route] Get Prerequisites of a Specific Course directly
 // router.get(
-//   "/:id/prerequisites",
+//     "/:courseId/prerequisites",
 //   CourseController.getCoursePrerequisites
 // );
 
