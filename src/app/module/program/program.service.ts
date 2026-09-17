@@ -11,6 +11,7 @@ import {
 const createProgram = async (payload: ICreateProgramPayload) => {
   const {
     name,
+    code,
     departmentId,
     degree,
     durationYears,
@@ -45,9 +46,21 @@ const createProgram = async (payload: ICreateProgramPayload) => {
     );
   }
 
+  const isDuplicateProgramCode = await prisma.program.findFirst({
+    where: { code: code.trim(), isDeleted: false },
+  });
+
+  if (isDuplicateProgramCode) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `A program with code '${code.trim()}' already exists.`,
+    );
+  }
+
   return await prisma.program.create({
     data: {
       name: name.trim(),
+      code: code.trim(),
       departmentId,
       degree: degree?.trim() || null,
       durationYears: durationYears || null,
@@ -76,6 +89,7 @@ const getAllPrograms = async (query: IQuery) => {
     andConditions.push({
       OR: [
         { name: { contains: query.searchTerm.trim(), mode: "insensitive" } },
+        { code: { contains: query.searchTerm.trim(), mode: "insensitive" } },
         { degree: { contains: query.searchTerm.trim(), mode: "insensitive" } },
       ],
     });
@@ -158,7 +172,7 @@ const updateProgram = async (
     );
   }
 
-  const { name, degree, durationYears, description, totalCredits, type } =
+  const { name, code, degree, durationYears, description, totalCredits, type } =
     payload;
   if (name) {
     const activeName = name ? name.trim() : isProgramExist.name;
@@ -172,6 +186,22 @@ const updateProgram = async (
       },
     });
 
+    if (code) {
+      const duplicateCodeCheck = await prisma.program.findFirst({
+        where: {
+          id: { not: programId },
+          code: code.trim(),
+          isDeleted: false,
+        },
+      });
+
+      if (duplicateCodeCheck) {
+        throw new AppError(
+          httpStatus.CONFLICT,
+          "Another program with this code already exists.",
+        );
+      }
+    }
     if (duplicateCheck) {
       throw new AppError(
         httpStatus.CONFLICT,
@@ -184,6 +214,7 @@ const updateProgram = async (
     where: { id: programId },
     data: {
       name: name?.trim(),
+      code: code?.trim(),
       degree: degree?.trim(),
       description:
         description !== undefined ? description?.trim() || null : undefined,
