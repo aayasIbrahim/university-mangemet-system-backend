@@ -26,6 +26,10 @@ const CreateCourseZodSchema = z.object({
   departmentId: z
     .string("Department ID is required")
     .uuid("Invalid Department ID format"),
+
+  semesterId: z
+    .string("Semester ID is required")
+    .uuid("Invalid Semester ID format"),
     
   programId: z
     .string("Program ID is required")

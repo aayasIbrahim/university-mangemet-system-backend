@@ -14,13 +14,15 @@ model Course {
 
   departmentId String     @db.Uuid
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
-  
+  semesterId   String     @db.Uuid
+  semester     Semester   @relation(fields: [semesterId], references: [id], onDelete: Restrict)
   programId    String     @db.Uuid
   program      Program    @relation(fields: [programId], references: [id], onDelete: Cascade)
 
-  // (একটি কোর্সের আন্ডারে একাধিক প্রি-রিকুয়েজিট কোর্স থাকতে পারে)
+
   prerequisites       CoursePrerequisite[] @relation("CourseToPrerequisite")
   prerequisiteFor     CoursePrerequisite[] @relation("PrerequisiteToCourse")
+  sections           Section[]
 
   @@index([departmentId])
   @@index([programId])
