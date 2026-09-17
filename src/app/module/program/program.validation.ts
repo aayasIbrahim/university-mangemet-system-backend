@@ -8,6 +8,12 @@ const CreateProgramZodSchema = z.object({
     .min(2, "Program name must be at least 2 characters long")
     .max(150, "Program name cannot exceed 150 characters"),
 
+  code: z
+    .string("Program code is required")
+    .trim()
+    .min(2, "Program code must be at least 2 characters long")
+    .max(20, "Program code cannot exceed 20 characters"),
+
   degree: z
     .string()
     .trim()
@@ -38,8 +44,9 @@ const CreateProgramZodSchema = z.object({
     .uuid("Invalid Department ID format"),
 });
 
-const UpdateProgramZodSchema = CreateProgramZodSchema.partial().omit({ departmentId: true });
-
+const UpdateProgramZodSchema = CreateProgramZodSchema.partial().omit({
+  departmentId: true,
+});
 
 export const ProgramValidation = {
   CreateProgramZodSchema,

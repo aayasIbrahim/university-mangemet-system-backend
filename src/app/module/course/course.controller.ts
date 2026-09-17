@@ -1,37 +1,31 @@
-import { Request, Response } from 'express';
-import httpStatus from 'http-status';
-import { CourseService } from './course.service';
-import { sendResponse } from '../../utils/sendResponse'; 
-import { catchAsync } from '../../utils/catchAsync';
+import { Request, Response } from "express";
+import httpStatus from "http-status";
+import { CourseService } from "./course.service";
+import { sendResponse } from "../../utils/sendResponse";
+import { catchAsync } from "../../utils/catchAsync";
 
-/**
- * 1. Create a New Course
- */
 const createCourse = catchAsync(async (req: Request, res: Response) => {
   const result = await CourseService.createCourse(req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: 'Course created successfully!',
+    message: "Course created successfully!",
     data: result,
   });
 });
 
-// /**
-//  * 2. Get All Courses (With Pagination, Search & Filters)
-//  */
-// const getAllCourses = catchAsync(async (req: Request, res: Response) => {
-//   const result = await CourseService.getAllCourses(req.query);
+const getAllCourses = catchAsync(async (req: Request, res: Response) => {
+  const result = await CourseService.getAllCourses(req.query);
 
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Courses fetched successfully!',
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Courses fetched successfully!",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 // /**
 //  * 3. Get Single Course By ID
@@ -91,8 +85,8 @@ const createCourse = catchAsync(async (req: Request, res: Response) => {
 
 export const CourseController = {
   createCourse,
-//   getAllCourses,
-//   getCourseById,
-//   updateCourse,
-//   deleteCourse,
+  getAllCourses,
+  //   getCourseById,
+  //   updateCourse,
+  //   deleteCourse,
 };

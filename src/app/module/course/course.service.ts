@@ -2,6 +2,8 @@ import httpStatus from "http-status";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import { ICoursePayload } from "./course.interface";
+import { CourseWhereInput } from "../../../generated/prisma/models";
+import { IQuery } from "../../interfaces";
 
 const createCourse = async (payload: ICoursePayload) => {
   const { code, title, credits, type, departmentId, programId, prerequisites } =
@@ -20,21 +22,25 @@ const createCourse = async (payload: ICoursePayload) => {
     );
   }
 
-const [isDeptExist, isProgramValid] = await Promise.all([
-  prisma.department.findUnique({
-    where: { id: departmentId, isDeleted: false },
-  }),
-  prisma.program.findFirst({
-    where: { 
-      id: programId, 
-      departmentId: departmentId, 
-      isDeleted: false 
-    },
-  }),
-]);
+  const [isDeptExist, isProgramValid] = await Promise.all([
+    prisma.department.findUnique({
+      where: { id: departmentId, isDeleted: false },
+    }),
+    prisma.program.findFirst({
+      where: {
+        id: programId,
+        departmentId: departmentId,
+        isDeleted: false,
+      },
+    }),
+  ]);
   if (!isDeptExist)
     throw new AppError(httpStatus.NOT_FOUND, "Target Department not found.");
-if (!isProgramValid) throw new AppError(httpStatus.NOT_FOUND, "Target Program not found or does not belong to this Department.");
+  if (!isProgramValid)
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Target Program not found or does not belong to this Department.",
+    );
 
   const transactionResult = await prisma.$transaction(async (tx) => {
     const newCourse = await tx.course.create({
@@ -62,7 +68,7 @@ if (!isProgramValid) throw new AppError(httpStatus.NOT_FOUND, "Target Program no
       where: { id: newCourse.id },
       include: {
         department: { select: { id: true, name: true, code: true } },
-        program: { select: { id: true, name: true} },
+        program: { select: { id: true, name: true } },
         prerequisites: {
           include: {
             prerequisite: { select: { id: true, code: true, title: true } },
@@ -75,54 +81,60 @@ if (!isProgramValid) throw new AppError(httpStatus.NOT_FOUND, "Target Program no
   return transactionResult;
 };
 
+const getAllCourses = async (query: IQuery) => {
+  const limit = query.limit ? Number(query.limit) : 10;
+  const page = query.page ? Number(query.page) : 1;
+  const skip = (page - 1) * limit;
+  const sortBy = query.sortBy || "code";
+  const sortOrder = query.sortOrder || "asc";
 
-// /**
-//  * 2. Get All Courses (With Pagination, Filtering & Search)
-//  */
-// const getAllCourses = async (query: ICourseQuery) => {
-//   const limit = query.limit ? Number(query.limit) : 10;
-//   const page = query.page ? Number(query.page) : 1;
-//   const skip = (page - 1) * limit;
-//   const sortBy = query.sortBy || "code";
-//   const sortOrder = query.sortOrder || "asc";
+  const andConditions: CourseWhereInput[] = [{ isDeleted: false }];
 
-//   const andConditions: Prisma.CourseWhereInput[] = [{ isDeleted: false }];
+  if (query.searchTerm) {
+    andConditions.push({
+      OR: [
+        { code: { contains: query.searchTerm.trim(), mode: "insensitive" } },
+        { title: { contains: query.searchTerm.trim(), mode: "insensitive" } },
+      ],
+    });
+  }
 
-//   if (query.searchTerm) {
-//     andConditions.push({
-//       OR: [
-//         { code: { contains: query.searchTerm.trim(), mode: "insensitive" } },
-//         { title: { contains: query.searchTerm.trim(), mode: "insensitive" } },
-//       ],
-//     });
-//   }
+  if (query.departmentId)
+    andConditions.push({ departmentId: query.departmentId });
+  if (query.programId) andConditions.push({ programId: query.programId });
+  if (query.type) andConditions.push({ type: query.type as any });
 
-//   if (query.departmentId) andConditions.push({ departmentId: query.departmentId });
-//   if (query.programId) andConditions.push({ programId: query.programId });
-//   if (query.type) andConditions.push({ type: query.type as any });
+  const whereConditions: CourseWhereInput = { AND: andConditions };
 
-//   const whereConditions: Prisma.CourseWhereInput = { AND: andConditions };
+  const [courses, totalCount] = await Promise.all([
+    prisma.course.findMany({
+      where: whereConditions,
+      take: limit,
+      skip: skip,
+      orderBy: { [sortBy]: sortOrder },
+      include: {
+        department: { select: { id: true, code: true } },
+        program: { select: { id: true, code: true } },
+        prerequisites: {
+          include: {
+            prerequisite: { select: { id: true, code: true, title: true } },
+          },
+        },
+      },
+    }),
+    prisma.course.count({ where: whereConditions }),
+  ]);
 
-//   const [courses, totalCount] = await Promise.all([
-//     prisma.course.findMany({
-//       where: whereConditions,
-//       take: limit,
-//       skip: skip,
-//       orderBy: { [sortBy]: sortOrder },
-//       include: {
-//         department: { select: { id: true, code: true } },
-//         program: { select: { id: true, code: true } },
-//         prerequisites: { include: { prerequisite: { select: { id: true, code: true, title: true } } } },
-//       },
-//     }),
-//     prisma.course.count({ where: whereConditions }),
-//   ]);
-
-//   return {
-//     meta: { page, limit, total: totalCount, totalPages: Math.ceil(totalCount / limit) },
-//     data: courses,
-//   };
-// };
+  return {
+    meta: {
+      page,
+      limit,
+      total: totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+    },
+    data: courses,
+  };
+};
 
 // /**
 //  * 3. Get Single Course by ID (With Deep Prerequisite Graph Mapping)
@@ -257,11 +269,10 @@ if (!isProgramValid) throw new AppError(httpStatus.NOT_FOUND, "Target Program no
 //   return prerequisitesData.map((item) => item.prerequisite);
 // };
 
-
 export const CourseService = {
   createCourse,
-//   getAllCourses,
-//   getCourseById,
-//   updateCourse,
-//   deleteCourse,
+    getAllCourses,
+  //   getCourseById,
+  //   updateCourse,
+  //   deleteCourse,
 };

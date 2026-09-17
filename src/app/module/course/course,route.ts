@@ -6,23 +6,16 @@ import { auth } from "../../middleware/checkAuth";
 import { Role } from "../../../generated/prisma/enums";
 import { validateRequest } from "../../middleware/validateReques";
 
-
 const router = Router();
-
 
 router.post(
   "/create-course",
-  auth(Role.SUPER_ADMIN, Role.REGISTRAR), 
+  auth(Role.SUPER_ADMIN, Role.REGISTRAR),
   validateRequest(CourseValidation.CreateCourseZodSchema),
-  CourseController.createCourse
+  CourseController.createCourse,
 );
 
-// // 2. Get All Courses (With Pagination, Search, filtering by department, program, or type)
-// router.get(
-//   "/",
-//   // Kept public so students can see available course catalogs when browsing plans
-//   CourseController.getAllCourses 
-// );
+router.get("/all-course", CourseController.getAllCourses);
 
 // // 3. Get a Single Course by ID (Includes its prerequisite graph details)
 // router.get(
