@@ -4,37 +4,8 @@ import { AppError } from "../../utils/AppError";
 import { ICoursePayload, IUpdateCoursePayload } from "./course.interface";
 import { CourseWhereInput } from "../../../generated/prisma/models";
 import { IQuery } from "../../interfaces";
+import { validatePrerequisites } from "./courese.utils";
 
-const validatePrerequisites = async (
-  prerequisites: string[],
-  courseId: string | undefined,
-  programId: string,
-) => {
-  if (courseId && prerequisites.includes(courseId)) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "A course cannot have itself listed as a prerequisite.",
-    );
-  }
-
-  if (prerequisites.length === 0) return;
-
-  const validPrerequisiteCount = await prisma.course.count({
-    where: {
-      id: { in: prerequisites },
-      programId,
-      isActive: true,
-      isDeleted: false,
-    },
-  });
-
-  if (validPrerequisiteCount !== prerequisites.length) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Every prerequisite must be an active course from the same program.",
-    );
-  }
-};
 
 const createCourse = async (payload: ICoursePayload) => {
   const {
