@@ -21,6 +21,7 @@ import { CourseRoutes } from "./app/module/course/course,route";
 import { SemesterRoutes } from "./app/module/semester/semester.route";
 import { SectionRoutes } from "./app/module/section/section.route";
 import { CourseEnrollmentRoutes } from "./app/module/courseEnrollment/courseEnrollment.route";
+import { AttendanceRoutes } from "./app/module/attendance/attendance.route";
 
 const app: Application = express();
 
@@ -45,6 +46,7 @@ app.use("/api/v1/course", CourseRoutes);
 app.use("/api/v1/semester", SemesterRoutes);
 app.use("/api/v1/section", SectionRoutes);
 app.use("/api/v1/course-enrollments", CourseEnrollmentRoutes);
+app.use("/api/v1/attendance", AttendanceRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
