@@ -1,7 +1,7 @@
 model StudentProfile {
   id             String           @id @default(uuid()) @db.Uuid
   studentIdNo    String?          @unique @db.VarChar(32)
-  status         EnrollmentStatus @default(ACTIVE)
+  status         StudentStatus @default(ACTIVE)
   enrollmentDate DateTime         @default(now())
   batch          String?          @db.VarChar(50)
   department     String?          @db.VarChar(120)
@@ -17,7 +17,9 @@ model StudentProfile {
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   programId      String?              @db.Uuid
   program        Program?         @relation(fields: [programId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-
+  enrollments CourseEnrollment[]
+  attendances Attendance[]
+  examMarks ExamMark[]
   @@index([status])
   @@index([studentIdNo])
   @@index([isDeleted])

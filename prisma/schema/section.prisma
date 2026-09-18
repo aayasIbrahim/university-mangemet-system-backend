@@ -17,12 +17,12 @@ model Section {
   semesterId   String             @db.Uuid
   semester     Semester           @relation(fields: [semesterId], references: [id], onDelete: Cascade)
   
-  // instructorId String?            @db.Uuid
-  // instructor   InstructorProfile? @relation(fields: [instructorId], references: [id])
+  instructorId String?            @db.Uuid
+  instructor   InstructorProfile? @relation(fields: [instructorId], references: [id])
 
-  // enrollments   CourseEnrollment[]
-  // classSessions ClassSession[]
-  // exams         Exam[]
+  enrollments   CourseEnrollment[]
+  classSessions ClassSession[]
+  exams         Exam[]
 
   @@unique([courseId, semesterId, sectionName])
   @@index([semesterId, isDeleted]) 

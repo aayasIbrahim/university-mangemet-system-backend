@@ -12,6 +12,7 @@ model Department {
   admin       User?     @relation("DepartmentAdmin", fields: [adminId], references: [id], onDelete:Cascade, onUpdate: Cascade)
   programs    Program[]
   courses     Course[]
+  instructors InstructorProfile[]
   @@index([isActive])
   @@map("departments")
 }
