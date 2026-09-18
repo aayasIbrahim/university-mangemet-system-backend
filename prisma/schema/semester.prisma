@@ -15,6 +15,7 @@ model Semester {
   
   sections         Section[]
   courses          Course[]
+  enrollments CourseEnrollment[]
 //   transcripts      Transcript[]
 //   invoices         Invoice[]
 //   academicReports  AcademicReport[]

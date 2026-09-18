@@ -1,0 +1,22 @@
+model Attendance {
+  id             String           @id @default(uuid()) @db.Uuid
+  
+  classSessionId String           @db.Uuid
+  classSession   ClassSession     @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  
+  studentId      String           @db.Uuid
+  student        StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+ 
+  status         AttendanceStatus @default(PRESENT) 
+  remarks        String?          @db.VarChar(255) // e.g., "Sick leave submitted"
+
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+ 
+  @@unique([classSessionId, studentId]) 
+  @@index([studentId, status])
+  @@map("attendances")
+}

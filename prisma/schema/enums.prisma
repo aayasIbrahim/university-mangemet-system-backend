@@ -22,18 +22,44 @@ enum ProgramType {
   POSTGRADUATE
   DIPLOMA
 }
-enum EnrollmentStatus {
+enum StudentStatus {
   ACTIVE
   SUSPENDED
   GRADUATED
   WITHDRAWN
 }
+
 enum CourseType {
   CORE
   ELECTIVE
   NON_CREDIT
 }
+enum EnrollmentStatus {
+  ENROLLED
+  DROPPED
+  WITHDRAWN
+  COMPLETED
+}
+enum ClassSessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+enum ExamType {
+  CLASS_TEST
+  QUIZ
+  ASSIGNMENT
+  MIDTERM
+  FINAL
+}
 
+enum ExamStatus {
+  SCHEDULED
+  ONGOING
+  EVALUATED
+  PUBLISHED // when the results are published and visible to students
+}
 enum AttendanceStatus {
   PRESENT
   ABSENT
@@ -41,11 +67,11 @@ enum AttendanceStatus {
   EXCUSED
 }
 
-enum ExamType {
-  MIDTERM
-  FINAL
-  QUIZ
-  ASSIGNMENT
+enum InstructorStatus {
+  ACTIVE
+  ON_LEAVE
+  RETIRED
+  SUSPENDED
 }
 
 enum FeeType {

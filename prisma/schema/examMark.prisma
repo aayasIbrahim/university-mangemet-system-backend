@@ -1,0 +1,25 @@
+model ExamMark {
+  id            String         @id @default(uuid()) @db.Uuid
+  examId        String         @db.Uuid
+  exam          Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  
+  studentId     String         @db.Uuid
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+ 
+  obtainedMarks Float          // total get mark of student
+  isAbsent      Boolean        @default(false) 
+  remarks       String?        @db.VarChar(255) // e.g., "Cheating reported", "Late submission"
+  
+ 
+ submittedById String            @db.Uuid 
+  submittedBy   InstructorProfile @relation("InstructorMarkSubmitter", fields: [submittedById], references: [id])
+  
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+ 
+  
+  @@unique([examId, studentId])
+  @@index([studentId])
+  @@map("exam_marks")
+}

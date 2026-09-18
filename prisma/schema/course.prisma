@@ -23,6 +23,7 @@ model Course {
   prerequisites       CoursePrerequisite[] @relation("CourseToPrerequisite")
   prerequisiteFor     CoursePrerequisite[] @relation("PrerequisiteToCourse")
   sections           Section[]
+  enrollments CourseEnrollment[]
 
   @@index([departmentId])
   @@index([programId])

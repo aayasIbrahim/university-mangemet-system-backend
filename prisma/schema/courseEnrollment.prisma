@@ -1,0 +1,39 @@
+model CourseEnrollment {
+  id               String           @id @default(uuid()) @db.Uuid
+  status           EnrollmentStatus @default( ENROLLED) 
+  
+  studentId        String           @db.Uuid
+  student          StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  sectionId        String           @db.Uuid
+  section          Section          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  
+ 
+  semesterId       String           @db.Uuid
+  semester         Semester         @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  
+  courseId         String           @db.Uuid
+  course           Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+
+  
+  // Grading and Marks brakdowun
+  classTestsMark   Float            @default(0.0)
+  midTermMark      Float            @default(0.0)
+  finalExamMark    Float            @default(0.0)
+  attendanceMark   Float            @default(0.0)
+  totalMark        Float            @default(0.0)
+  
+  finalGradePoint  Float?           // e.g., 3.75
+  finalLetterGrade String?          @db.VarChar(5) // e.g., "A-", "B+"
+
+  enrolledAt       DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([studentId, sectionId]) 
+  @@unique([studentId, semesterId, courseId]) 
+  @@index([semesterId, status])
+  @@map("course_enrollments")
+}
+
+
