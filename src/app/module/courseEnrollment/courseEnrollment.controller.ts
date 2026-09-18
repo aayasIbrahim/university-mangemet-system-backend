@@ -5,6 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import { CourseEnrollmentService } from "./courseEnrollment.service";
 import { AppError } from "../../utils/AppError";
 import { Role } from "../../../generated/prisma/enums";
+import { prisma } from "../../lib/prisma";
 
 const enrollInCourse = catchAsync(async (req: Request, res: Response) => {
   const currentUser = req.user;
@@ -22,6 +23,19 @@ const enrollInCourse = catchAsync(async (req: Request, res: Response) => {
         "Administrative enrollment requires a 'studentId' in the request body.",
       );
     }
+
+    const studentProfile = await prisma.studentProfile.findFirst({
+      where: { userId: currentUser.userId, isDeleted: false },
+      select: { id: true },
+    });
+
+    if (!studentProfile) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "No matching Student Profile found for this authenticated user account.",
+      );
+    }
+
     targetedStudentId = studentId!;
   } else {
     if (!currentUser?.userId) {

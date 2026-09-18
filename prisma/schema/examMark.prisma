@@ -12,7 +12,7 @@ model ExamMark {
   remarks       String?        @db.VarChar(255) // e.g., "Cheating reported", "Late submission"
   
  
- submittedById String            @db.Uuid 
+   submittedById String            @db.Uuid 
   submittedBy   InstructorProfile @relation("InstructorMarkSubmitter", fields: [submittedById], references: [id])
   
   createdAt     DateTime       @default(now())

@@ -17,11 +17,12 @@ import { AuthRoutes } from "./app/module/auth/auth.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { DepartmentRoutes } from "./app/module/department/department.route";
 import { ProgramRoutes } from "./app/module/program/program.route";
-import { CourseRoutes } from "./app/module/course/course,route";
+import { CourseRoutes } from "./app/module/course/course.route";
 import { SemesterRoutes } from "./app/module/semester/semester.route";
 import { SectionRoutes } from "./app/module/section/section.route";
 import { CourseEnrollmentRoutes } from "./app/module/courseEnrollment/courseEnrollment.route";
 import { AttendanceRoutes } from "./app/module/attendance/attendance.route";
+import { ExamRoutes } from "./app/module/exam/exam.route";
 
 const app: Application = express();
 
@@ -47,6 +48,7 @@ app.use("/api/v1/semester", SemesterRoutes);
 app.use("/api/v1/section", SectionRoutes);
 app.use("/api/v1/course-enrollments", CourseEnrollmentRoutes);
 app.use("/api/v1/attendance", AttendanceRoutes);
+app.use("/api/v1/exam", ExamRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

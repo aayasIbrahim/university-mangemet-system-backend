@@ -58,7 +58,7 @@ enum ExamStatus {
   SCHEDULED
   ONGOING
   EVALUATED
-  PUBLISHED // when the results are published and visible to students
+  PUBLISHED 
 }
 enum AttendanceStatus {
   PRESENT
