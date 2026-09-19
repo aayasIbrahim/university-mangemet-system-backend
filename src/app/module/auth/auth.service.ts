@@ -141,6 +141,7 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
   const otpKey = `student-registration-otp:${email}`;
 
   const redisOtp = await redisClient.get(otpKey);
+  console.log({ redisOtp });
 
   if (!redisOtp) {
     throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP");
@@ -161,6 +162,7 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
   }
 
   const studentPayload: IRegisterStudentPayload = JSON.parse(redisStudentData);
+  const studentData = studentPayload.student ?? {};
 
   const createdUser = await prisma.user.create({
     data: {
@@ -177,17 +179,17 @@ const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
       studentProfile: {
         create: {
           studentIdNo:
-            studentPayload.student.studentIdNo ||
+            studentData.studentIdNo ||
             `STU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-          status: studentPayload?.student.status || "ACTIVE",
-          batch: studentPayload.student.batch,
-          program: studentPayload.student.program
-            ? { connect: { id: studentPayload.student.program } }
+          status: studentData.status || "ACTIVE",
+          batch: studentData.batch,
+          program: studentData.program
+            ? { connect: { id: studentData.program } }
             : undefined,
-          department: studentPayload.student.department,
-          semester: studentPayload.student.semester,
-          address: studentPayload.student.address,
-          emergencyPhone: studentPayload.student.emergencyPhone,
+          department: studentData.department,
+          semester: studentData.semester,
+          address: studentData.address,
+          emergencyPhone: studentData.emergencyPhone,
         },
       },
     },
@@ -278,11 +280,12 @@ const loginUser = async (payload: ILoginUserPayload) => {
     password,
     user.password as string,
   );
-
   if (!isPasswordMatched) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Incorrect password. Please try again.",
+    );
   }
-
   const jwtPayload = {
     userId: user.id,
     fristName: user.firstName,

@@ -12,16 +12,19 @@ enum UserStatus {
   BLOCKED
   DELETED
 }
+
 enum AuthProvider {
   GOOGLE
   CREDENTIAL
 }
+
 enum ProgramType {
   UNDERGRADUATE
   GRADUATE
   POSTGRADUATE
   DIPLOMA
 }
+
 enum StudentStatus {
   ACTIVE
   SUSPENDED
@@ -34,18 +37,21 @@ enum CourseType {
   ELECTIVE
   NON_CREDIT
 }
+
 enum EnrollmentStatus {
   ENROLLED
   DROPPED
   WITHDRAWN
   COMPLETED
 }
+
 enum ClassSessionStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
   RESCHEDULED
 }
+
 enum ExamType {
   CLASS_TEST
   QUIZ
@@ -58,8 +64,9 @@ enum ExamStatus {
   SCHEDULED
   ONGOING
   EVALUATED
-  PUBLISHED 
+  PUBLISHED
 }
+
 enum AttendanceStatus {
   PRESENT
   ABSENT
@@ -94,5 +101,23 @@ enum NotificationType {
   FINANCIAL
   SYSTEM
   EXAM
+}
 
+enum TranscriptStatus {
+  DRAFT
+  PUBLISHED
+  REVOKED
+}
+
+enum AcademicReportType {
+  SEMESTER_SUMMARY
+  DEPARTMENT_PERFORMANCE
+  PROGRAM_PERFORMANCE
+  COURSE_PERFORMANCE
+}
+
+enum AcademicReportStatus {
+  GENERATING
+  READY
+  FAILED
 }

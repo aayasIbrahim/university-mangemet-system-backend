@@ -11,8 +11,8 @@ const router = Router();
 router.post(
   "/enroll",
   auth(Role.DEPARTMENT_ADMIN, Role.SUPER_ADMIN, Role.STUDENT),
+  // validateRequest(CourseEnrollmentValidation.EnrollInCourseZodSchema),
 
-  validateRequest(CourseEnrollmentValidation.EnrollInCourseZodSchema),
   CourseEnrollmentController.enrollInCourse,
 );
 
@@ -32,6 +32,12 @@ router.patch(
 router.get(
   "/my-enrollments",
   auth(Role.DEPARTMENT_ADMIN, Role.SUPER_ADMIN, Role.INSTRUCTOR, Role.STUDENT),
+  CourseEnrollmentController.getMyEnrollments,
+);
+
+router.get(
+  "/my-courses",
+  auth(Role.STUDENT),
   CourseEnrollmentController.getMyEnrollments,
 );
 

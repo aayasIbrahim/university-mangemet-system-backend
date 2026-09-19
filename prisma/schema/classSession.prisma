@@ -1,22 +1,19 @@
 model ClassSession {
-  id           String             @id @default(uuid()) @db.Uuid
-  
+  id String @id @default(uuid()) @db.Uuid
 
-  sectionId    String             @db.Uuid
-  section      Section            @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  
+  sectionId String  @db.Uuid
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
-  date         DateTime           @db.Date      
-  startTime    String             @db.VarChar(5) 
-  endTime      String             @db.VarChar(5) 
-  roomNumber   String?            @db.VarChar(15) 
-  topic        String?            @db.VarChar(255) 
-  status       ClassSessionStatus @default(SCHEDULED)
-  
+  date       DateTime           @db.Date
+  startTime  String             @db.VarChar(5)
+  endTime    String             @db.VarChar(5)
+  roomNumber String?            @db.VarChar(15)
+  topic      String?            @db.VarChar(255)
+  status     ClassSessionStatus @default(SCHEDULED)
 
-  attendances  Attendance[]
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  attendances Attendance[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([sectionId, date])
   @@index([status])

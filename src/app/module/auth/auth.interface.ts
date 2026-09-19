@@ -1,4 +1,4 @@
-import type { EnrollmentStatus, Role } from "../../../generated/prisma/browser";
+import type { Role, StudentStatus } from "../../../generated/prisma/browser";
 
 export interface ILoginUserPayload {
   email: string;
@@ -6,7 +6,7 @@ export interface ILoginUserPayload {
 }
 
 export interface IStudentProfileInput {
-  status?: EnrollmentStatus;
+  status?: StudentStatus;
   studentIdNo?: string;
   batch?: string;
   program?: string;
@@ -22,7 +22,7 @@ export interface IRegisterStudentPayload {
   email: string;
   password: string;
   phone?: string;
-  student: IStudentProfileInput;
+  student?: IStudentProfileInput;
 }
 export interface IVerifyEmailPayload {
   email: string;

@@ -1,0 +1,27 @@
+model AcademicReport {
+  id            String               @id @default(uuid()) @db.Uuid
+  semesterId    String               @db.Uuid
+  semester      Semester             @relation(fields: [semesterId], references: [id], onDelete: Restrict)
+  generatedById String?              @db.Uuid
+  generatedBy   User?                @relation("AcademicReportGenerator", fields: [generatedById], references: [id], onDelete: SetNull)
+
+  type          AcademicReportType
+  status        AcademicReportStatus @default(GENERATING)
+  title         String               @db.VarChar(200)
+  departmentId  String?              @db.Uuid
+  department    Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  programId     String?              @db.Uuid
+  program       Program?             @relation(fields: [programId], references: [id], onDelete: SetNull)
+  reportData    Json
+  errorMessage  String?              @db.Text
+  generatedAt   DateTime             @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@unique([semesterId, type, departmentId, programId])
+  @@index([semesterId, status])
+  @@index([departmentId])
+  @@index([programId])
+  @@map("academic_reports")
+}

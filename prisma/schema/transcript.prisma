@@ -1,0 +1,25 @@
+model Transcript {
+  id            String             @id @default(uuid()) @db.Uuid
+  studentId     String             @db.Uuid
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  semesterId    String             @db.Uuid
+  semester      Semester           @relation(fields: [semesterId], references: [id], onDelete: Restrict)
+
+  status         TranscriptStatus @default(DRAFT)
+  sgpa           Decimal          @db.Decimal(4, 2)
+  cgpa           Decimal          @db.Decimal(4, 2)
+  attemptedCredits Decimal        @db.Decimal(6, 2)
+  earnedCredits    Decimal        @db.Decimal(6, 2)
+  totalQualityPoints Decimal      @db.Decimal(8, 2)
+  entries        TranscriptEntry[]
+  publishedAt    DateTime?
+  issuedAt       DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([studentId, semesterId])
+  @@index([studentId, status])
+  @@index([semesterId, status])
+  @@map("transcripts")
+}
+
