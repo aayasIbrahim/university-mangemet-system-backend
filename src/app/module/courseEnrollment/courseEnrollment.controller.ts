@@ -24,19 +24,7 @@ const enrollInCourse = catchAsync(async (req: Request, res: Response) => {
       );
     }
 
-    const studentProfile = await prisma.studentProfile.findFirst({
-      where: { userId: currentUser.userId, isDeleted: false },
-      select: { id: true },
-    });
-
-    if (!studentProfile) {
-      throw new AppError(
-        httpStatus.NOT_FOUND,
-        "No matching Student Profile found for this authenticated user account.",
-      );
-    }
-
-    targetedStudentId = studentId!;
+    targetedStudentId = studentId;
   } else {
     if (!currentUser?.userId) {
       throw new AppError(
@@ -45,7 +33,20 @@ const enrollInCourse = catchAsync(async (req: Request, res: Response) => {
       );
     }
 
-    targetedStudentId = currentUser.userId;
+    const studentProfile = await prisma.studentProfile.findFirst({
+      where: { userId: currentUser.userId, isDeleted: false },
+      select: { id: true },
+    });
+
+    if (!studentProfile) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "No active Student Profile found for this authenticated user account.",
+      );
+    }
+
+    targetedStudentId = studentProfile.id;
+    console.log({targetedStudentId})
   }
 
   const result = await CourseEnrollmentService.enrollInCourse({
@@ -95,7 +96,27 @@ const dropEnrolledCourse = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyEnrollments = catchAsync(async (req: Request, res: Response) => {
-  const studentId = req.user?.userId || (req.query.studentId as string);
+  let studentId = req.query.studentId as string | undefined;
+
+  if (!studentId && req.user?.userId) {
+    const studentProfile = await prisma.studentProfile.findFirst({
+      where: { userId: req.user.userId, isDeleted: false },
+      select: { id: true },
+    });
+
+    if (!studentProfile) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "No active Student Profile found for this authenticated user account.",
+      );
+    }
+
+    studentId = studentProfile.id;
+  }
+
+  if (!studentId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Student ID is required.");
+  }
 
   const result = await CourseEnrollmentService.getMyEnrollments(
     studentId,

@@ -1,17 +1,17 @@
 import { z } from 'zod';
 
-const EnrollInCourseZodSchema = z.object({
-  body: z.object({
-    sectionId: z
-      .string( 'Section UUID identifier is required.' )
-      .uuid({ message: 'Invalid field structure. Must be a valid UUID v4 format.' }),
+// const EnrollInCourseZodSchema = z.object({
+//   body: z.object({
+//     sectionId: z
+//       .string( 'Section UUID identifier is required.' )
+//       .uuid({ message: 'Invalid field structure. Must be a valid UUID v4 format.' }),
     
-    studentId: z
-      .string()
-      .uuid({ message: 'Invalid field structure. Must be a valid UUID v4 format.' })
-      .optional(), 
-  }),
-});
+//     studentId: z
+//       .string()
+//       .uuid({ message: 'Invalid field structure. Must be a valid UUID v4 format.' })
+//       .optional(), 
+//   }),
+// });
 
 const UpdateEnrollmentMarksZodSchema = z.object({
   body: z.object({
@@ -44,6 +44,6 @@ const UpdateEnrollmentMarksZodSchema = z.object({
 });
 
 export const CourseEnrollmentValidation = {
-  EnrollInCourseZodSchema,
+  // EnrollInCourseZodSchema,
   UpdateEnrollmentMarksZodSchema,
 };

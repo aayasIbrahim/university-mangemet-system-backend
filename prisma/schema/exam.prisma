@@ -1,30 +1,26 @@
 model Exam {
-  id           String            @id @default(uuid()) @db.Uuid
-  title        String            @db.VarChar(100) // e.g., "Midterm Exam", "Quiz 1"
-  type         ExamType
-  status       ExamStatus        @default(SCHEDULED) 
-  
- 
-  totalMarks   Float             // e.g., 50.00
-  weightage    Float             // e.g., 30.00  weightage of this exam in the final grade calculation (in percentage)
-  
-  
-  examDate     DateTime          @db.Date
-  startTime    String            @db.VarChar(5)   // e.g., "10:00" (24-hour format)
-  endTime      String            @db.VarChar(5)   // e.g., "12:00"
-  roomNumber   String?           @db.VarChar(15)  // e.g., "Exam Hall 1"
-  
+  id     String     @id @default(uuid()) @db.Uuid
+  title  String     @db.VarChar(100) // e.g., "Midterm Exam", "Quiz 1"
+  type   ExamType
+  status ExamStatus @default(SCHEDULED)
 
-  sectionId    String            @db.Uuid
-  section      Section           @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  
+  totalMarks Float // e.g., 50.00
+  weightage  Float // e.g., 30.00  weightage of this exam in the final grade calculation (in percentage)
+
+  examDate   DateTime @db.Date
+  startTime  String   @db.VarChar(5) // e.g., "10:00" (24-hour format)
+  endTime    String   @db.VarChar(5) // e.g., "12:00"
+  roomNumber String?  @db.VarChar(15) // e.g., "Exam Hall 1"
+
+  sectionId String  @db.Uuid
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
   instructorId String            @db.Uuid
   instructor   InstructorProfile @relation(fields: [instructorId], references: [id])
-  
 
-  marks        ExamMark[]
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  marks     ExamMark[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@index([sectionId, status])
   @@index([examDate])

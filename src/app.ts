@@ -1,6 +1,3 @@
-// biome-ignore lint/correctness/noUnusedImports: <explanation>
-// biome-ignore assist/source/organizeImports: <explanation>
-
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, {
@@ -23,6 +20,8 @@ import { SectionRoutes } from "./app/module/section/section.route";
 import { CourseEnrollmentRoutes } from "./app/module/courseEnrollment/courseEnrollment.route";
 import { AttendanceRoutes } from "./app/module/attendance/attendance.route";
 import { ExamRoutes } from "./app/module/exam/exam.route";
+import { TranscriptRoutes } from "./app/module/transcript/transcript.route";
+import { AcademicReportRoutes } from "./app/module/academicReport/academicReport.route";
 
 const app: Application = express();
 
@@ -49,6 +48,8 @@ app.use("/api/v1/section", SectionRoutes);
 app.use("/api/v1/course-enrollments", CourseEnrollmentRoutes);
 app.use("/api/v1/attendance", AttendanceRoutes);
 app.use("/api/v1/exam", ExamRoutes);
+app.use("/api/v1/transcripts", TranscriptRoutes);
+app.use("/api/v1/academic-reports", AcademicReportRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {
