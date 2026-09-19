@@ -8,8 +8,21 @@ import { AcademicReportValidation } from "./academicReport.validation";
 const router = Router();
 const reportRoles = [Role.SUPER_ADMIN, Role.REGISTRAR, Role.DEPARTMENT_ADMIN];
 
-router.post("/generate", auth(...reportRoles), validateRequest(AcademicReportValidation.GenerateAcademicReportSchema), AcademicReportController.generateAcademicReport);
-router.get("/", auth(...reportRoles), AcademicReportController.getAcademicReports);
-router.get("/:reportId", auth(...reportRoles), AcademicReportController.getAcademicReport);
+router.post(
+  "/generate",
+  auth(...reportRoles),
+  validateRequest(AcademicReportValidation.GenerateAcademicReportSchema),
+  AcademicReportController.generateAcademicReport,
+);
+router.get(
+  "/",
+  auth(...reportRoles),
+  AcademicReportController.getAcademicReports,
+);
+router.get(
+  "/:reportId",
+  auth(...reportRoles),
+  AcademicReportController.getAcademicReport,
+);
 
 export const AcademicReportRoutes = router;
