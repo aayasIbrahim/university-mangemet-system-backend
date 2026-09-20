@@ -27,6 +27,7 @@ model User {
   attendances        Attendance[]       @relation("AttendanceEvaluator")
   createdInvoices    Invoice[]          @relation("InvoiceCreator")
   createdRefunds     Refund[]           @relation("RefundCreator")
+  auditLogs          AuditLog[]         @relation("AuditActor")
 
   @@index([role])
   @@index([isActive])

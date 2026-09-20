@@ -46,7 +46,7 @@ router.post(
   "/payments/:paymentId/refund",
   auth(Role.FINANCE_ADMIN, Role.SUPER_ADMIN),
   validateRequest(PaymentValidation.refund),
-  PaymentController.refundPayment, // পারশিয়াল বা ফুল রিফান্ড ট্র্যাকিং
+  PaymentController.refundPayment, 
 );
 export const PaymentRoutes = router;
 

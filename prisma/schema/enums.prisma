@@ -92,11 +92,12 @@ enum FeeType {
 enum PaymentStatus {
   PENDING
   PAID
-  PARTIAL
+  PARTIALLY_PAID
   OVERDUE
   FAILED
   CANCELED
   REFUNDED
+
 }
 
 enum PaymentMethod {
@@ -112,7 +113,18 @@ enum RefundStatus {
   PENDING
   SUCCEEDED
   FAILED
+ 
+
 }
+enum AuditAction {
+  USER_ROLE_UPDATED
+  USER_STATUS_UPDATED
+  INVOICE_CREATED
+  INVOICE_CANCELED
+  PAYMENT_RECORDED
+  PAYMENT_REFUNDED
+}
+
 
 enum NotificationType {
   ACADEMIC
