@@ -278,10 +278,7 @@ npm run format:check
 npm run format:fix
 npm run lint:check
 npm run lint:fix
-<<<<<<< HEAD
-=======
-npm run  "stripe:webhook":,
->>>>>>> 63ee8fb (feat: add reset password success and student welcome email templates)
+npm run stripe:webhook
 ```
 
 ### Script notes
