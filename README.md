@@ -252,21 +252,21 @@ Expected response:
 
 The application configuration is centralized in `src/app/config/index.ts` and reads values from `.env`.
 
-| Variable | Description |
-| --- | --- |
-| `NODE_ENV` | Runtime environment |
-| `PORT` | Port used by Express |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_ACCESS_SECRET` | Access token secret |
-| `JWT_REFRESH_SECRET` | Refresh token secret |
-| `FRONTEND_URL` | Frontend URL for CORS |
-| `REDIS_HOST` | Redis host |
-| `REDIS_PORT` | Redis port |
-| `SMTP_USER` | Email provider username |
-| `SMTP_PASSWORD` | Email provider password |
-| `EMAIL_SENDER` | Sender email |
-| `CLOUDINARY_*` | Cloudinary credentials |
-| `STRIPE_*` | Stripe payment config |
+| Variable             | Description                  |
+| -------------------- | ---------------------------- |
+| `NODE_ENV`           | Runtime environment          |
+| `PORT`               | Port used by Express         |
+| `DATABASE_URL`       | PostgreSQL connection string |
+| `JWT_ACCESS_SECRET`  | Access token secret          |
+| `JWT_REFRESH_SECRET` | Refresh token secret         |
+| `FRONTEND_URL`       | Frontend URL for CORS        |
+| `REDIS_HOST`         | Redis host                   |
+| `REDIS_PORT`         | Redis port                   |
+| `SMTP_USER`          | Email provider username      |
+| `SMTP_PASSWORD`      | Email provider password      |
+| `EMAIL_SENDER`       | Sender email                 |
+| `CLOUDINARY_*`       | Cloudinary credentials       |
+| `STRIPE_*`           | Stripe payment config        |
 
 ## Available Scripts
 
@@ -298,160 +298,160 @@ http://localhost:5000/api/v1
 
 ### Core endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `GET` | `/` | No | Health check endpoint |
+| Method | Route | Auth | Description           |
+| ------ | ----- | ---- | --------------------- |
+| `GET`  | `/`   | No   | Health check endpoint |
 
 ### Authentication endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/auth/register` | No | Register a student |
-| `POST` | `/api/v1/auth/verify-email` | No | Verify email |
-| `POST` | `/api/v1/auth/login` | No | Login user |
-| `GET` | `/api/v1/auth/me` | Yes | Fetch current user |
-| `POST` | `/api/v1/auth/refresh-token` | No | Refresh access token |
-| `POST` | `/api/v1/auth/forgot-password` | No | Request password reset |
-| `POST` | `/api/v1/auth/reset-password` | No | Reset password |
-| `POST` | `/api/v1/auth/google` | No | Google login |
+| Method | Route                          | Auth | Description            |
+| ------ | ------------------------------ | ---- | ---------------------- |
+| `POST` | `/api/v1/auth/register`        | No   | Register a student     |
+| `POST` | `/api/v1/auth/verify-email`    | No   | Verify email           |
+| `POST` | `/api/v1/auth/login`           | No   | Login user             |
+| `GET`  | `/api/v1/auth/me`              | Yes  | Fetch current user     |
+| `POST` | `/api/v1/auth/refresh-token`   | No   | Refresh access token   |
+| `POST` | `/api/v1/auth/forgot-password` | No   | Request password reset |
+| `POST` | `/api/v1/auth/reset-password`  | No   | Reset password         |
+| `POST` | `/api/v1/auth/google`          | No   | Google login           |
 
 ### User endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `PATCH` | `/api/v1/user/profile` | Yes | Update user profile |
-| `PATCH` | `/api/v1/user/profile-image` | Yes | Upload profile image |
+| Method  | Route                        | Auth | Description          |
+| ------- | ---------------------------- | ---- | -------------------- |
+| `PATCH` | `/api/v1/user/profile`       | Yes  | Update user profile  |
+| `PATCH` | `/api/v1/user/profile-image` | Yes  | Upload profile image |
 
 ### Student application endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/student-applications/apply` | No | Submit student application |
-| `POST` | `/api/v1/student-applications/verify-email` | No | Verify application email |
-| `GET` | `/api/v1/student-applications/` | Yes | View all applications |
-| `POST` | `/api/v1/student-applications/approve` | Yes | Approve application |
-| `POST` | `/api/v1/student-applications/reject` | Yes | Reject application |
+| Method | Route                                       | Auth | Description                |
+| ------ | ------------------------------------------- | ---- | -------------------------- |
+| `POST` | `/api/v1/student-applications/apply`        | No   | Submit student application |
+| `POST` | `/api/v1/student-applications/verify-email` | No   | Verify application email   |
+| `GET`  | `/api/v1/student-applications/`             | Yes  | View all applications      |
+| `POST` | `/api/v1/student-applications/approve`      | Yes  | Approve application        |
+| `POST` | `/api/v1/student-applications/reject`       | Yes  | Reject application         |
 
 ### Department endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/departments/create-department` | Yes | Create department |
-| `GET` | `/api/v1/departments/all-department` | No | Get all departments |
-| `GET` | `/api/v1/departments/:departmentId` | No | Get signle department |
-| `PATCH` | `/api/v1/departments/:departmentId` | Yes | Update department |
-| `DELETE` | `/api/v1/departments/:departmentId` | Yes | Delete department |
-| `GET` | `/api/v1/departments/:departmentId/programs` | No | Get department programs |
+| Method   | Route                                        | Auth | Description             |
+| -------- | -------------------------------------------- | ---- | ----------------------- |
+| `POST`   | `/api/v1/departments/create-department`      | Yes  | Create department       |
+| `GET`    | `/api/v1/departments/all-department`         | No   | Get all departments     |
+| `GET`    | `/api/v1/departments/:departmentId`          | No   | Get signle department   |
+| `PATCH`  | `/api/v1/departments/:departmentId`          | Yes  | Update department       |
+| `DELETE` | `/api/v1/departments/:departmentId`          | Yes  | Delete department       |
+| `GET`    | `/api/v1/departments/:departmentId/programs` | No   | Get department programs |
 
 ### Program endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/program/create-program` | Yes | Create program |
-| `GET` | `/api/v1/program/all-program` | No | Get all programs |
-| `GET` | `/api/v1/program/:programId` | No | Get single program |
-| `PATCH` | `/api/v1/program/:programId` | Yes | Update program |
-| `DELETE` | `/api/v1/program/:programId` | Yes | Delete program |
+| Method   | Route                            | Auth | Description        |
+| -------- | -------------------------------- | ---- | ------------------ |
+| `POST`   | `/api/v1/program/create-program` | Yes  | Create program     |
+| `GET`    | `/api/v1/program/all-program`    | No   | Get all programs   |
+| `GET`    | `/api/v1/program/:programId`     | No   | Get single program |
+| `PATCH`  | `/api/v1/program/:programId`     | Yes  | Update program     |
+| `DELETE` | `/api/v1/program/:programId`     | Yes  | Delete program     |
 
 ### Course endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/course/create-course` | Yes | Create course |
-| `GET` | `/api/v1/course/all-course` | No | Get all courses |
-| `GET` | `/api/v1/course/:courseId` | No | Get single course |
-| `PATCH` | `/api/v1/course/:courseId` | Yes | Update course |
-| `DELETE` | `/api/v1/course/:courseId` | Yes | Delete course |
-| `GET` | `/api/v1/course/:courseId/prerequisites` | Yes | Get prerequisites |
+| Method   | Route                                    | Auth | Description       |
+| -------- | ---------------------------------------- | ---- | ----------------- |
+| `POST`   | `/api/v1/course/create-course`           | Yes  | Create course     |
+| `GET`    | `/api/v1/course/all-course`              | No   | Get all courses   |
+| `GET`    | `/api/v1/course/:courseId`               | No   | Get single course |
+| `PATCH`  | `/api/v1/course/:courseId`               | Yes  | Update course     |
+| `DELETE` | `/api/v1/course/:courseId`               | Yes  | Delete course     |
+| `GET`    | `/api/v1/course/:courseId/prerequisites` | Yes  | Get prerequisites |
 
 ### Semester endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/semester/create-semester` | Yes | Create semester |
-| `GET` | `/api/v1/semester/all-semesters` | Yes | Get all semesters |
-| `GET` | `/api/v1/semester/:semesterId` | Yes | Get single semester |
-| `PATCH` | `/api/v1/semester/:semesterId` | Yes | Update semester |
-| `DELETE` | `/api/v1/semester/:semesterId` | Yes | Delete semester |
+| Method   | Route                              | Auth | Description         |
+| -------- | ---------------------------------- | ---- | ------------------- |
+| `POST`   | `/api/v1/semester/create-semester` | Yes  | Create semester     |
+| `GET`    | `/api/v1/semester/all-semesters`   | Yes  | Get all semesters   |
+| `GET`    | `/api/v1/semester/:semesterId`     | Yes  | Get single semester |
+| `PATCH`  | `/api/v1/semester/:semesterId`     | Yes  | Update semester     |
+| `DELETE` | `/api/v1/semester/:semesterId`     | Yes  | Delete semester     |
 
 ### Section endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/section/create-section` | Yes | Create section |
-| `GET` | `/api/v1/section/all-sections` | Yes | Get all sections |
-| `GET` | `/api/v1/section/:sectionId` | Yes | Get single section |
-| `PATCH` | `/api/v1/section/:sectionId` | Yes | Update section |
-| `DELETE` | `/api/v1/section/:sectionId` | Yes | Delete section |
+| Method   | Route                            | Auth | Description        |
+| -------- | -------------------------------- | ---- | ------------------ |
+| `POST`   | `/api/v1/section/create-section` | Yes  | Create section     |
+| `GET`    | `/api/v1/section/all-sections`   | Yes  | Get all sections   |
+| `GET`    | `/api/v1/section/:sectionId`     | Yes  | Get single section |
+| `PATCH`  | `/api/v1/section/:sectionId`     | Yes  | Update section     |
+| `DELETE` | `/api/v1/section/:sectionId`     | Yes  | Delete section     |
 
 ### Course enrollment endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/course-enrollments/enroll` | Yes | Enroll student |
-| `PATCH` | `/api/v1/course-enrollments/:enrollmentId/update-marks` | Yes | Update marks |
-| `PATCH` | `/api/v1/course-enrollments/:enrollmentId/drop` | Yes | Drop course |
-| `GET` | `/api/v1/course-enrollments/my-enrollments` | Yes | Get enrollments |
-| `GET` | `/api/v1/course-enrollments/my-courses` | Yes | Get student courses |
+| Method  | Route                                                   | Auth | Description         |
+| ------- | ------------------------------------------------------- | ---- | ------------------- |
+| `POST`  | `/api/v1/course-enrollments/enroll`                     | Yes  | Enroll student      |
+| `PATCH` | `/api/v1/course-enrollments/:enrollmentId/update-marks` | Yes  | Update marks        |
+| `PATCH` | `/api/v1/course-enrollments/:enrollmentId/drop`         | Yes  | Drop course         |
+| `GET`   | `/api/v1/course-enrollments/my-enrollments`             | Yes  | Get enrollments     |
+| `GET`   | `/api/v1/course-enrollments/my-courses`                 | Yes  | Get student courses |
 
 ### Attendance endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/attendance/session/:classSessionId/mark` | Yes | Mark attendance |
+| Method | Route                                             | Auth | Description     |
+| ------ | ------------------------------------------------- | ---- | --------------- |
+| `POST` | `/api/v1/attendance/session/:classSessionId/mark` | Yes  | Mark attendance |
 
 ### Exam endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/exam/create-exam` | Yes | Create exam |
-| `GET` | `/api/v1/exam/all-exam` | Yes | Get all exams |
-| `GET` | `/api/v1/exam/:examId` | Yes | Get single exam |
-| `PATCH` | `/api/v1/exam/:examId` | Yes | Update exam |
-| `DELETE` | `/api/v1/exam/:examId` | Yes | Delete exam |
-| `POST` | `/api/v1/exam/:examId/marks` | Yes | Submit marks |
-| `GET` | `/api/v1/exam/:examId/marks` | Yes | View marks |
+| Method   | Route                        | Auth | Description     |
+| -------- | ---------------------------- | ---- | --------------- |
+| `POST`   | `/api/v1/exam/create-exam`   | Yes  | Create exam     |
+| `GET`    | `/api/v1/exam/all-exam`      | Yes  | Get all exams   |
+| `GET`    | `/api/v1/exam/:examId`       | Yes  | Get single exam |
+| `PATCH`  | `/api/v1/exam/:examId`       | Yes  | Update exam     |
+| `DELETE` | `/api/v1/exam/:examId`       | Yes  | Delete exam     |
+| `POST`   | `/api/v1/exam/:examId/marks` | Yes  | Submit marks    |
+| `GET`    | `/api/v1/exam/:examId/marks` | Yes  | View marks      |
 
 ### Transcript endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/transcripts/:studentId/generate` | Yes | Generate transcript |
-| `GET` | `/api/v1/transcripts/` | Yes | Get all transcripts |
-| `GET` | `/api/v1/transcripts/:transcriptId` | Yes | Get single transcript |
-| `PATCH` | `/api/v1/transcripts/:transcriptId/publish` | Yes | Publish transcript |
-| `GET` | `/api/v1/transcripts/my` | Yes | Get my transcript |
+| Method  | Route                                       | Auth | Description           |
+| ------- | ------------------------------------------- | ---- | --------------------- |
+| `POST`  | `/api/v1/transcripts/:studentId/generate`   | Yes  | Generate transcript   |
+| `GET`   | `/api/v1/transcripts/`                      | Yes  | Get all transcripts   |
+| `GET`   | `/api/v1/transcripts/:transcriptId`         | Yes  | Get single transcript |
+| `PATCH` | `/api/v1/transcripts/:transcriptId/publish` | Yes  | Publish transcript    |
+| `GET`   | `/api/v1/transcripts/my`                    | Yes  | Get my transcript     |
 
 ### Academic report endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/academic-reports/generate` | Yes | Generate report |
-| `GET` | `/api/v1/academic-reports/` | Yes | Get all reports |
-| `GET` | `/api/v1/academic-reports/:reportId` | Yes | Get single report |
+| Method | Route                                | Auth | Description       |
+| ------ | ------------------------------------ | ---- | ----------------- |
+| `POST` | `/api/v1/academic-reports/generate`  | Yes  | Generate report   |
+| `GET`  | `/api/v1/academic-reports/`          | Yes  | Get all reports   |
+| `GET`  | `/api/v1/academic-reports/:reportId` | Yes  | Get single report |
 
 ### Payment endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/payments/invoices` | Yes | Create invoice |
-| `GET` | `/api/v1/payments/invoices` | Yes | Get all invoices |
-| `GET` | `/api/v1/payments/invoices/me` | Yes | Get my invoices |
-| `GET` | `/api/v1/payments/invoices/:invoiceId/status` | Yes | Check invoice status |
-| `POST` | `/api/v1/payments/invoices/:invoiceId/checkout` | Yes | Create checkout |
-| `POST` | `/api/v1/payments/invoices/:invoiceId/manual-pay` | Yes | Manual payment |
-| `POST` | `/api/v1/payments/invoices/:invoiceId/cancel` | Yes | Cancel invoice |
-| `POST` | `/api/v1/payments/payments/:paymentId/refund` | Yes | Refund payment |
-| `POST` | `/api/v1/payments/webhook` | No | Stripe webhook |
+| Method | Route                                             | Auth | Description          |
+| ------ | ------------------------------------------------- | ---- | -------------------- |
+| `POST` | `/api/v1/payments/invoices`                       | Yes  | Create invoice       |
+| `GET`  | `/api/v1/payments/invoices`                       | Yes  | Get all invoices     |
+| `GET`  | `/api/v1/payments/invoices/me`                    | Yes  | Get my invoices      |
+| `GET`  | `/api/v1/payments/invoices/:invoiceId/status`     | Yes  | Check invoice status |
+| `POST` | `/api/v1/payments/invoices/:invoiceId/checkout`   | Yes  | Create checkout      |
+| `POST` | `/api/v1/payments/invoices/:invoiceId/manual-pay` | Yes  | Manual payment       |
+| `POST` | `/api/v1/payments/invoices/:invoiceId/cancel`     | Yes  | Cancel invoice       |
+| `POST` | `/api/v1/payments/payments/:paymentId/refund`     | Yes  | Refund payment       |
+| `POST` | `/api/v1/payments/webhook`                        | No   | Stripe webhook       |
 
 ### Admin endpoints
 
-| Method | Route | Auth | Description |
-| --- | --- | --- | --- |
-| `GET` | `/api/v1/admin/users` | Yes | List users |
-| `PATCH` | `/api/v1/admin/users/:id/role` | Yes | Update user role |
-| `GET` | `/api/v1/admin/dashboard-stats` | Yes | Get dashboard stats |
-| `GET` | `/api/v1/admin/audit-logs` | Yes | Get audit logs |
+| Method  | Route                           | Auth | Description         |
+| ------- | ------------------------------- | ---- | ------------------- |
+| `GET`   | `/api/v1/admin/users`           | Yes  | List users          |
+| `PATCH` | `/api/v1/admin/users/:id/role`  | Yes  | Update user role    |
+| `GET`   | `/api/v1/admin/dashboard-stats` | Yes  | Get dashboard stats |
+| `GET`   | `/api/v1/admin/audit-logs`      | Yes  | Get audit logs      |
 
 ## Database & Prisma
 
@@ -464,6 +464,32 @@ npx prisma generate
 npx prisma migrate dev
 npx prisma studio
 ```
+
+## Postman Collection
+
+You can import the API collection for this backend directly into Postman.
+
+### Files
+
+- [postman/university-management-system.postman_collection.json](postman/university-management-system.postman_collection.json)
+- [postman/university-management-local.postman_environment.json](postman/university-management-local.postman_environment.json)
+
+### How to use
+
+1. Open Postman
+2. Click Import
+3. Select both JSON files
+4. Choose the environment named `University Management System - Local`
+5. Start the backend with:
+
+```bash
+npm run dev
+```
+
+6. Login from the Auth section to get the access token
+7. Use other API requests with the token automatically set in the environment
+
+> Some endpoints require real IDs from database records, such as `departmentId`, `programId`, `courseId`, `semesterId`, `invoiceId`, or `studentId`.
 
 ## License
 

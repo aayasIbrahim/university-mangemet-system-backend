@@ -1,0 +1,684 @@
+{
+  "info": {
+    "_postman_id": "d4a3c8de-11d7-4e2a-a71d-3f0777d9185a",
+    "name": "University Management System API",
+    "description": "Postman collection for the university management backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Student\",\n  \"lastName\": \"One\",\n  \"email\": \"student1@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student1@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-email"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student1@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student1@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student1@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Google Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"google_id_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Student\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Upload Profile Image",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "profileImage", "type": "file", "src": "" }]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/profile-image",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "profile-image"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student Applications",
+      "item": [
+        {
+          "name": "Apply",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "studentId", "value": "" },
+                { "key": "programId", "value": "" },
+                { "key": "resume", "type": "file", "src": "" },
+                { "key": "additionalFiles", "type": "file", "src": "" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student-applications/apply",
+              "host": ["{{baseUrl}}"],
+              "path": ["student-applications", "apply"]
+            }
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student-applications/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["student-applications", "verify-email"]
+            }
+          }
+        },
+        {
+          "name": "Get All Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/student-applications/",
+              "host": ["{{baseUrl}}"],
+              "path": ["student-applications", ""]
+            }
+          }
+        },
+        {
+          "name": "Approve Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student-applications/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["student-applications", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationId\": \"\",\n  \"reason\": \"Not eligible\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student-applications/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["student-applications", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Academic Management",
+      "item": [
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Computer Science\",\n  \"code\": \"CSE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/departments/create-department",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments", "create-department"]
+            }
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/departments/all-department",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments", "all-department"]
+            }
+          }
+        },
+        {
+          "name": "Create Program",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"BSc in Computer Science\",\n  \"departmentId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/program/create-program",
+              "host": ["{{baseUrl}}"],
+              "path": ["program", "create-program"]
+            }
+          }
+        },
+        {
+          "name": "Get All Programs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/program/all-program",
+              "host": ["{{baseUrl}}"],
+              "path": ["program", "all-program"]
+            }
+          }
+        },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Data Structures\",\n  \"code\": \"CSE-201\",\n  \"credit\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/course/create-course",
+              "host": ["{{baseUrl}}"],
+              "path": ["course", "create-course"]
+            }
+          }
+        },
+        {
+          "name": "Get All Courses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/course/all-course",
+              "host": ["{{baseUrl}}"],
+              "path": ["course", "all-course"]
+            }
+          }
+        },
+        {
+          "name": "Create Semester",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Spring 2026\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-05-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/semester/create-semester",
+              "host": ["{{baseUrl}}"],
+              "path": ["semester", "create-semester"]
+            }
+          }
+        },
+        {
+          "name": "Create Section",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"A\",\n  \"courseId\": \"\",\n  \"semesterId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/section/create-section",
+              "host": ["{{baseUrl}}"],
+              "path": ["section", "create-section"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollment & Exam",
+      "item": [
+        {
+          "name": "Enroll in Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"\",\n  \"sectionId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/course-enrollments/enroll",
+              "host": ["{{baseUrl}}"],
+              "path": ["course-enrollments", "enroll"]
+            }
+          }
+        },
+        {
+          "name": "My Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/course-enrollments/my-enrollments",
+              "host": ["{{baseUrl}}"],
+              "path": ["course-enrollments", "my-enrollments"]
+            }
+          }
+        },
+        {
+          "name": "Create Exam",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"\",\n  \"title\": \"Midterm\",\n  \"date\": \"2026-03-10\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam/create-exam",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam", "create-exam"]
+            }
+          }
+        },
+        {
+          "name": "Get All Exams",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exam/all-exam",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam", "all-exam"]
+            }
+          }
+        },
+        {
+          "name": "Submit Exam Marks",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"\",\n  \"score\": 90\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam/{{examId}}/marks",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam", "{{examId}}", "marks"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transcript & Reports",
+      "item": [
+        {
+          "name": "Generate Transcript",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transcripts/{{studentId}}/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["transcripts", "{{studentId}}", "generate"]
+            }
+          }
+        },
+        {
+          "name": "Get My Transcripts",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/transcripts/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["transcripts", "my"]
+            }
+          }
+        },
+        {
+          "name": "Generate Academic Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"programId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/academic-reports/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["academic-reports", "generate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"\",\n  \"amount\": 5000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Get My Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/invoices/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "invoices", "me"]
+            }
+          }
+        },
+        {
+          "name": "Create Checkout Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/invoices/{{invoiceId}}/checkout",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "invoices", "{{invoiceId}}", "checkout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/dashboard-stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "dashboard-stats"]
+            }
+          }
+        },
+        {
+          "name": "Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit-logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "audit-logs"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
