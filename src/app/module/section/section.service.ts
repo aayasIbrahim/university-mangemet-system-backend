@@ -13,6 +13,8 @@ import { ensureUniqueSection, sectionInclude, validateCourseAndSemester } from "
 
 const createSection = async (payload: ICreateSectionPayload) => {
   const sectionName = payload.sectionName.trim().toUpperCase();
+  const roomNumber = payload.roomNumber?.trim() || null;
+
   await validateCourseAndSemester(payload.courseId, payload.semesterId);
   await ensureUniqueSection(payload.courseId, payload.semesterId, sectionName);
 
@@ -20,6 +22,7 @@ const createSection = async (payload: ICreateSectionPayload) => {
     data: {
       sectionName,
       capacity: payload.capacity ?? 40,
+      roomNumber,
       courseId: payload.courseId,
       semesterId: payload.semesterId,
       isActive: payload.isActive ?? true,
@@ -90,6 +93,10 @@ const updateSection = async (id: string, payload: IUpdateSectionPayload) => {
   const semesterId = payload.semesterId ?? existingSection.semesterId;
   const sectionName =
     payload.sectionName?.trim().toUpperCase() ?? existingSection.sectionName;
+  const roomNumber =
+    payload.roomNumber !== undefined
+      ? payload.roomNumber.trim() || null
+      : existingSection.roomNumber;
 
   await validateCourseAndSemester(courseId, semesterId);
   await ensureUniqueSection(courseId, semesterId, sectionName, id);
@@ -99,6 +106,7 @@ const updateSection = async (id: string, payload: IUpdateSectionPayload) => {
     data: {
       sectionName,
       capacity: payload.capacity,
+      roomNumber,
       courseId,
       semesterId,
       isActive: payload.isActive,

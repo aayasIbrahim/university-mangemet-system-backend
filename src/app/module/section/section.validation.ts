@@ -12,6 +12,13 @@ const SectionFieldsSchema = z.object({
     .min(1, "Capacity must be at least 1")
     .max(1000, "Capacity cannot exceed 1000")
     .optional(),
+  roomNumber: z
+    .string()
+    .trim()
+    .max(20, "Room number cannot exceed 20 characters")
+    .nullable()
+    .optional()
+    .transform((val) => (val === "" ? null : val ?? null)),
   courseId: z.string("Course ID is required").uuid("Invalid Course ID format"),
   semesterId: z
     .string("Semester ID is required")

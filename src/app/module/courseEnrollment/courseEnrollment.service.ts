@@ -69,7 +69,7 @@ const enrollInCourse = async (payload: IEnrollCoursePayload) => {
           throw new AppError(
             httpStatus.BAD_REQUEST,
             `Section '${sectionName}' has reached its maximum capacity of ${capacity} students.`,
-          );
+          )
         }
 
         return tx.courseEnrollment.create({
@@ -185,7 +185,7 @@ const getMyEnrollments = async (studentId: string, query: IQuery) => {
       take: limit,
       orderBy: { [sortBy]: sortOrder },
       include: {
-        course: { select: { name: true, code: true, credits: true } },
+        course: { select: { title: true, code: true, credits: true } },
         section: { select: { sectionName: true, roomNumber: true } },
         semester: { select: { name: true, code: true, isCurrent: true } },
       },
