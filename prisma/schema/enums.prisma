@@ -13,6 +13,12 @@ enum UserStatus {
   DELETED
 }
 
+enum StudentApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum AuthProvider {
   GOOGLE
   CREDENTIAL

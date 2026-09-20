@@ -12,6 +12,7 @@ import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { UserRoutes } from "./app/module/user/user.route";
+import { StudentApplicationRoutes } from "./app/module/studentApplication/studentApplication.route";
 import { DepartmentRoutes } from "./app/module/department/department.route";
 import { ProgramRoutes } from "./app/module/program/program.route";
 import { CourseRoutes } from "./app/module/course/course.route";
@@ -22,7 +23,10 @@ import { AttendanceRoutes } from "./app/module/attendance/attendance.route";
 import { ExamRoutes } from "./app/module/exam/exam.route";
 import { TranscriptRoutes } from "./app/module/transcript/transcript.route";
 import { AcademicReportRoutes } from "./app/module/academicReport/academicReport.route";
-import { PaymentRoutes, PaymentWebhookRoutes } from "./app/module/payment/payment.route";
+import {
+  PaymentRoutes,
+  PaymentWebhookRoutes,
+} from "./app/module/payment/payment.route";
 import { AdminRoutes } from "./app/module/admin/admin.route";
 
 const app: Application = express();
@@ -34,7 +38,11 @@ app.use(
   }),
 );
 
-app.use("/api/v1/payments/webhook", express.raw({ type: "application/json" }), PaymentWebhookRoutes);
+app.use(
+  "/api/v1/payments/webhook",
+  express.raw({ type: "application/json" }),
+  PaymentWebhookRoutes,
+);
 
 // Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -44,6 +52,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/user", UserRoutes);
+app.use("/api/v1/student-applications", StudentApplicationRoutes);
 app.use("/api/v1/departments", DepartmentRoutes);
 app.use("/api/v1/program", ProgramRoutes);
 app.use("/api/v1/course", CourseRoutes);

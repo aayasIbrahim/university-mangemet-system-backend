@@ -15,6 +15,7 @@ model Program {
   departmentId    String           @db.Uuid
   department      Department       @relation(fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   students        StudentProfile[]
+  studentApplications StudentApplication[]
   cousrse         Course[]
   academicReports AcademicReport[]
 
