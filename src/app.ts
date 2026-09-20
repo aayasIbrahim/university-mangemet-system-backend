@@ -23,6 +23,7 @@ import { ExamRoutes } from "./app/module/exam/exam.route";
 import { TranscriptRoutes } from "./app/module/transcript/transcript.route";
 import { AcademicReportRoutes } from "./app/module/academicReport/academicReport.route";
 import { PaymentRoutes, PaymentWebhookRoutes } from "./app/module/payment/payment.route";
+import { AdminRoutes } from "./app/module/admin/admin.route";
 
 const app: Application = express();
 
@@ -54,6 +55,7 @@ app.use("/api/v1/exam", ExamRoutes);
 app.use("/api/v1/transcripts", TranscriptRoutes);
 app.use("/api/v1/academic-reports", AcademicReportRoutes);
 app.use("/api/v1/payments", PaymentRoutes);
+app.use("/api/v1/admin", AdminRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

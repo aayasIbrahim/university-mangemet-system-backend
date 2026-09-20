@@ -1,3 +1,4 @@
+
 import crypto from "node:crypto";
 import httpStatus from "http-status";
 import Stripe from "stripe";
@@ -379,7 +380,7 @@ const processManualPayment = async (
     const newDueAmount = invoice.dueAmount - amountPaidInPoisha;
 
     const nextStatus =
-      newDueAmount === 0 ? PaymentStatus.PAID : PaymentStatus.PARTIAL;
+      newDueAmount === 0 ? PaymentStatus.PAID : PaymentStatus.PARTIALLY_PAID;
 
     await tx.invoice.update({
       where: { id: invoiceId },
@@ -432,8 +433,8 @@ const cancelInvoice = async (invoiceId: string) => {
 
 const refundPayment = async (
   paymentId: string,
-  adminId: string, // রিফান্ড কারী অ্যাডমিনের আইডি
   payload: { amountToRefund: number; reason: string },
+  createdById: string,
 ) => {
   const refundAmountInPoisha = Math.round(payload.amountToRefund * 100);
 
@@ -445,9 +446,9 @@ const refundPayment = async (
 
     if (!payment) throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
 
-    // ১. চেক করা: ইতিমধ্যে এই পেমেন্টের বিপরীতে মোট কত রিফান্ড করা হয়েছে
+   
     const totalAlreadyRefunded = payment.refunds
-      .filter((r) => r.status === "SUCCEEDED" || r.status === "PENDING")
+      .filter((r) => r.status ===  RefundStatus.SUCCEEDED || r.status === RefundStatus.FAILED)
       .reduce((sum, r) => sum + r.amount, 0);
 
     if (totalAlreadyRefunded + refundAmountInPoisha > payment.amountPaid) {
@@ -457,18 +458,18 @@ const refundPayment = async (
       );
     }
 
-    // ২. নতুন রিফান্ড রেকর্ড তৈরি (আপনার নতুন মডেল অনুযায়ী)
+
     const refund = await tx.refund.create({
       data: {
         paymentId,
         amount: refundAmountInPoisha,
-        reason: payload.reason,
-        status: "SUCCEEDED", // যদি অনলাইন হয় তবে গেটওয়ে রেসপন্স অনুযায়ী হবে
-        createdById: adminId,
+        status: RefundStatus.SUCCEEDED, 
+        reason: payload.reason || null,
+        createdById: createdById,
       },
     });
 
-    // ৩. ইনভয়েসের ব্যালেন্স এবং ডিউ আপডেট করা
+   
     const invoice = payment.invoice;
     const newPaidAmount = invoice.paidAmount - refundAmountInPoisha;
     const newDueAmount = invoice.dueAmount + refundAmountInPoisha;
@@ -478,7 +479,10 @@ const refundPayment = async (
       data: {
         paidAmount: newPaidAmount,
         dueAmount: newDueAmount,
-        status: newPaidAmount === 0 ? "REFUNDED" : "PARTIALLY_PAID",
+        status:
+          newPaidAmount === 0
+            ? PaymentStatus.REFUNDED
+            : PaymentStatus.PARTIALLY_PAID,
       },
     });
 

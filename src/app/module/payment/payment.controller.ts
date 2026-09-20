@@ -50,16 +50,14 @@ const getMyInvoices = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllInvoices = catchAsync(async (req: Request, res: Response) => {
-  // req.query থেকে ফিল্টার প্যারামিটারগুলো ক্যাচ করা হচ্ছে
   const query = req.query;
 
   const result = await PaymentService.getAllInvoices(query);
 
-  // আপনার প্রজেক্টের গ্লোবাল রেসপন্স ফরম্যাট অনুযায়ী রেসপন্স পাঠানো
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Invoices fetched successfully',
+    message: "Invoices fetched successfully",
     meta: result.meta,
     data: result.data,
   });
@@ -70,7 +68,7 @@ const getInvoiceStatus = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Invoice payment status fetched successfully',
+    message: "Invoice payment status fetched successfully",
     data: result,
   });
 });
@@ -78,18 +76,23 @@ const processManualPayment = catchAsync(async (req: Request, res: Response) => {
   const { invoiceId } = req.params;
   const payload = req.body;
 
-  const result = await PaymentService.processManualPayment(invoiceId as string,payload);
+  const result = await PaymentService.processManualPayment(
+    invoiceId as string,
+    payload,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Manual offline payment recorded successfully',
+    message: "Manual offline payment recorded successfully",
     data: result,
   });
 });
 
 const cancelInvoice = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentService.cancelInvoice(req.params.invoiceId as string);
+  const { invoiceId } = req.params;
+
+  const result = await PaymentService.cancelInvoice(invoiceId as string);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -99,10 +102,14 @@ const cancelInvoice = catchAsync(async (req: Request, res: Response) => {
 });
 
 const refundPayment = catchAsync(async (req: Request, res: Response) => {
+  const { paymentId } = req.params;
+  const payload = req.body;
+  const createdById = req.user!.userId;
+
   const result = await PaymentService.refundPayment(
-    req.params.paymentId as string,
-    req.body,
-    req.user!.userId,
+    paymentId as string,
+    payload,
+    createdById,
   );
   sendResponse(res, {
     statusCode: httpStatus.OK,
