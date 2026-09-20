@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import { pathToFileURL } from "node:url";
 import {
   AttendanceStatus,
+  AcademicReportStatus,
+  AcademicReportType,
   ClassSessionStatus,
   CourseType,
   EnrollmentStatus,
@@ -9,6 +11,7 @@ import {
   ProgramType,
   Role,
   StudentStatus,
+  TranscriptStatus,
   UserStatus,
 } from "../../generated/prisma/enums";
 import config from "../config";
@@ -848,6 +851,206 @@ export const seedIndustryData = async () => {
   console.log("Industry-standard academic seed data created successfully.");
 };
 
+export const seedTranscriptAndAcademicReports = async () => {
+  const semester = await prisma.semester.findUnique({
+    where: { code: "FALL26" },
+    select: { id: true, name: true, code: true },
+  });
+  const registrar = await prisma.user.findUnique({
+    where: { email: config.tester_registrar_email },
+    select: { id: true },
+  });
+
+  if (!semester || !registrar) {
+    console.log(
+      "Transcript/report seed skipped: semester or registrar is missing.",
+    );
+    return;
+  }
+
+  const enrollments = await prisma.courseEnrollment.findMany({
+    where: { semesterId: semester.id },
+    include: {
+      student: { select: { id: true } },
+      course: { select: { id: true, code: true, title: true, credits: true } },
+    },
+  });
+
+  const gradePoints = [
+    { point: 4, letter: "A" },
+    { point: 3.5, letter: "A-" },
+    { point: 3, letter: "B" },
+  ];
+
+  for (const [index, enrollment] of enrollments.entries()) {
+    const grade = gradePoints[index % gradePoints.length];
+    await prisma.courseEnrollment.update({
+      where: { id: enrollment.id },
+      data: {
+        status: EnrollmentStatus.COMPLETED,
+        classTestsMark: 24,
+        midTermMark: 26,
+        finalExamMark: 35,
+        attendanceMark: 9,
+        totalMark: 94,
+        finalGradePoint: grade.point,
+        finalLetterGrade: grade.letter,
+      },
+    });
+  }
+
+  const completedEnrollments = await prisma.courseEnrollment.findMany({
+    where: { semesterId: semester.id, status: EnrollmentStatus.COMPLETED },
+    include: {
+      course: { select: { id: true, code: true, title: true, credits: true } },
+    },
+  });
+  const studentIds = [
+    ...new Set(completedEnrollments.map((item) => item.studentId)),
+  ];
+
+  for (const studentId of studentIds) {
+    const studentEnrollments = completedEnrollments.filter(
+      (item) => item.studentId === studentId,
+    );
+    const attemptedCredits = studentEnrollments.reduce(
+      (sum, item) => sum + item.course.credits,
+      0,
+    );
+    const earnedCredits = studentEnrollments.reduce(
+      (sum, item) =>
+        sum +
+        (item.finalGradePoint !== null && item.finalGradePoint >= 2
+          ? item.course.credits
+          : 0),
+      0,
+    );
+    const totalQualityPoints = studentEnrollments.reduce(
+      (sum, item) => sum + (item.finalGradePoint ?? 0) * item.course.credits,
+      0,
+    );
+
+    await prisma.transcript.upsert({
+      where: { studentId_semesterId: { studentId, semesterId: semester.id } },
+      update: {
+        status: TranscriptStatus.PUBLISHED,
+        sgpa: attemptedCredits ? totalQualityPoints / attemptedCredits : 0,
+        cgpa: attemptedCredits ? totalQualityPoints / attemptedCredits : 0,
+        attemptedCredits,
+        earnedCredits,
+        totalQualityPoints,
+        issuedAt: new Date(),
+        publishedAt: new Date(),
+        entries: {
+          deleteMany: {},
+          create: studentEnrollments.map((item) => ({
+            courseId: item.course.id,
+            courseCode: item.course.code,
+            courseTitle: item.course.title,
+            credits: item.course.credits,
+            letterGrade: item.finalLetterGrade,
+            gradePoint: item.finalGradePoint,
+            qualityPoints: (item.finalGradePoint ?? 0) * item.course.credits,
+            isPassed: (item.finalGradePoint ?? 0) >= 2,
+          })),
+        },
+      },
+      create: {
+        studentId,
+        semesterId: semester.id,
+        status: TranscriptStatus.PUBLISHED,
+        sgpa: attemptedCredits ? totalQualityPoints / attemptedCredits : 0,
+        cgpa: attemptedCredits ? totalQualityPoints / attemptedCredits : 0,
+        attemptedCredits,
+        earnedCredits,
+        totalQualityPoints,
+        issuedAt: new Date(),
+        publishedAt: new Date(),
+        entries: {
+          create: studentEnrollments.map((item) => ({
+            courseId: item.course.id,
+            courseCode: item.course.code,
+            courseTitle: item.course.title,
+            credits: item.course.credits,
+            letterGrade: item.finalLetterGrade,
+            gradePoint: item.finalGradePoint,
+            qualityPoints: (item.finalGradePoint ?? 0) * item.course.credits,
+            isPassed: (item.finalGradePoint ?? 0) >= 2,
+          })),
+        },
+      },
+    });
+  }
+
+  const department = await prisma.department.findUnique({
+    where: { code: "CSE" },
+    select: { id: true },
+  });
+  if (!department) return;
+
+  const reportData = {
+    enrollmentCount: completedEnrollments.length,
+    gradedCount: completedEnrollments.filter(
+      (item) => item.finalGradePoint !== null,
+    ).length,
+    passedCount: completedEnrollments.filter(
+      (item) => (item.finalGradePoint ?? 0) >= 2,
+    ).length,
+    failedCount: completedEnrollments.filter(
+      (item) => (item.finalGradePoint ?? 0) < 2,
+    ).length,
+    passRate: 100,
+    averageGpa: completedEnrollments.length
+      ? Number(
+          (
+            completedEnrollments.reduce(
+              (sum, item) => sum + (item.finalGradePoint ?? 0),
+              0,
+            ) / completedEnrollments.length
+          ).toFixed(2),
+        )
+      : 0,
+    gradeDistribution: { A: 2, "A-": 2, B: 2 },
+    generatedAt: new Date().toISOString(),
+  };
+  const report = await prisma.academicReport.findFirst({
+    where: {
+      semesterId: semester.id,
+      type: AcademicReportType.DEPARTMENT_PERFORMANCE,
+      departmentId: department.id,
+      programId: null,
+    },
+    select: { id: true },
+  });
+
+  if (report) {
+    await prisma.academicReport.update({
+      where: { id: report.id },
+      data: {
+        status: AcademicReportStatus.READY,
+        reportData,
+        completedAt: new Date(),
+        generatedById: registrar.id,
+      },
+    });
+  } else {
+    await prisma.academicReport.create({
+      data: {
+        semesterId: semester.id,
+        type: AcademicReportType.DEPARTMENT_PERFORMANCE,
+        status: AcademicReportStatus.READY,
+        title: `${semester.name} CSE Department Performance`,
+        departmentId: department.id,
+        generatedById: registrar.id,
+        reportData,
+        completedAt: new Date(),
+      },
+    });
+  }
+
+  console.log("Transcript and academic report seed data created successfully.");
+};
+
 if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
@@ -860,6 +1063,7 @@ if (
     await seedTesterAdmin();
     await seedTesterAcademicUsers();
     await seedIndustryData();
+    await seedTranscriptAndAcademicReports();
   } catch (error) {
     console.error("Error running seed script:", error);
   } finally {

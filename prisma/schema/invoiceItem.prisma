@@ -1,0 +1,11 @@
+model InvoiceItem {
+  id          String  @id @default(uuid()) @db.Uuid
+  invoiceId   String  @db.Uuid
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  feeType     FeeType
+  description String?
+  amount      Int
+
+  @@unique([invoiceId, feeType])
+  @@index([invoiceId])
+}

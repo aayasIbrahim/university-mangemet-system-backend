@@ -12,11 +12,12 @@ model Semester {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  sections    Section[]
-  courses     Course[]
-  enrollments CourseEnrollment[]
-  transcripts      Transcript[]
+  sections        Section[]
+  courses         Course[]
+  enrollments     CourseEnrollment[]
+  transcripts     Transcript[]
   academicReports AcademicReport[]
+  invoices        Invoice[]
 
   @@index([isCurrent, isDeleted])
   @@map("semesters")

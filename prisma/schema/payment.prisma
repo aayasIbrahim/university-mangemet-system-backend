@@ -1,0 +1,39 @@
+model Payment {
+  id        String  @id @default(uuid()) @db.Uuid
+  receiptNo String  @unique // For auditing and customer receipts
+  invoiceId String  @db.Uuid
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  amountPaid    Int // Stored in Cents/Poisha
+  paymentMethod PaymentMethod
+  transactionId String        @unique
+  status        PaymentStatus @default(PENDING)
+  remarks       String? // Optional note (e.g., bank branch name, reference)
+
+  // Status handling for escrow/gateway settlement verification
+  isVerified Boolean @default(false)
+
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  refunds   Refund[]
+
+  @@index([invoiceId])
+  @@index([transactionId])
+  @@map("payments")
+}
+
+model Refund {
+  id             String       @id @default(uuid()) @db.Uuid
+  paymentId      String       @db.Uuid
+  payment        Payment      @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  amount         Int
+  status         RefundStatus @default(PENDING)
+  reason         String?
+  stripeRefundId String?      @unique
+  createdById    String       @db.Uuid
+  createdBy      User         @relation("RefundCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt      DateTime     @default(now())
+
+  @@index([paymentId, status])
+  @@map("payment_refunds")
+}
