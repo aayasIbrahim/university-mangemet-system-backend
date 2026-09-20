@@ -68,8 +68,13 @@ The application follows a modular backend architecture, with each domain organiz
 ├── biome.json
 ├── package.json
 ├── prisma.config.ts
+├── tsup.config.ts
+├── vercel.json
 ├── tsconfig.json
 ├── README.md
+├── postman/
+│   ├── university-management-system.postman_collection.json
+│   └── university-management-local.postman_environment.json
 ├── prisma/
 │   └── schema/
 │       ├── acadamicReport.prisma
@@ -121,7 +126,6 @@ The application follows a modular backend architecture, with each domain organiz
 │   │   │   └── user/
 │   │   ├── templates/
 │   │   ├── utils/
-│   │   └── interfaces/
 │   └── generated/
 │       └── prisma/
 └── node_modules/
