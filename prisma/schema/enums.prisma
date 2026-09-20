@@ -94,6 +94,24 @@ enum PaymentStatus {
   PAID
   PARTIAL
   OVERDUE
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BKASH
+  NAGAD
+  ROCKET
+  BANK_TRANSFER
+  CARD
+  CASH
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
 }
 
 enum NotificationType {

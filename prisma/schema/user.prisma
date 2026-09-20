@@ -21,10 +21,12 @@ model User {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   studentProfile     StudentProfile?
-  generatedReports   AcademicReport[] @relation("AcademicReportGenerator")
+  generatedReports   AcademicReport[]   @relation("AcademicReportGenerator")
   instructorProfile  InstructorProfile?
   departmentAdmin    Department?        @relation("DepartmentAdmin")
   attendances        Attendance[]       @relation("AttendanceEvaluator")
+  createdInvoices    Invoice[]          @relation("InvoiceCreator")
+  createdRefunds     Refund[]           @relation("RefundCreator")
 
   @@index([role])
   @@index([isActive])

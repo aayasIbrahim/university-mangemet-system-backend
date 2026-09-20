@@ -18,12 +18,11 @@ model Course {
   programId    String     @db.Uuid
   program      Program    @relation(fields: [programId], references: [id], onDelete: Cascade)
 
-  prerequisites   CoursePrerequisite[] @relation("CourseToPrerequisite")
-  prerequisiteFor CoursePrerequisite[] @relation("PrerequisiteToCourse")
-  sections        Section[]
-  enrollments     CourseEnrollment[]
+  prerequisites     CoursePrerequisite[] @relation("CourseToPrerequisite")
+  prerequisiteFor   CoursePrerequisite[] @relation("PrerequisiteToCourse")
+  sections          Section[]
+  enrollments       CourseEnrollment[]
   transcriptEntries TranscriptEntry[]
-  
 
   @@index([departmentId])
   @@index([programId])

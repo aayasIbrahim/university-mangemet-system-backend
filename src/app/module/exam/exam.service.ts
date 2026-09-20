@@ -118,7 +118,7 @@ const getAllExams = async (query: IQuery) => {
       where,
       skip,
       take: limit,
-      orderBy: { [sortBy]: sortOrder } as any,
+        orderBy: { [sortBy]: sortOrder },
       include: {
         section: {
           select: {

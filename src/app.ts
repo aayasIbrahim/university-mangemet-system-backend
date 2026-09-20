@@ -22,6 +22,7 @@ import { AttendanceRoutes } from "./app/module/attendance/attendance.route";
 import { ExamRoutes } from "./app/module/exam/exam.route";
 import { TranscriptRoutes } from "./app/module/transcript/transcript.route";
 import { AcademicReportRoutes } from "./app/module/academicReport/academicReport.route";
+import { PaymentRoutes, PaymentWebhookRoutes } from "./app/module/payment/payment.route";
 
 const app: Application = express();
 
@@ -31,6 +32,8 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use("/api/v1/payments/webhook", express.raw({ type: "application/json" }), PaymentWebhookRoutes);
 
 // Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -50,6 +53,7 @@ app.use("/api/v1/attendance", AttendanceRoutes);
 app.use("/api/v1/exam", ExamRoutes);
 app.use("/api/v1/transcripts", TranscriptRoutes);
 app.use("/api/v1/academic-reports", AcademicReportRoutes);
+app.use("/api/v1/payments", PaymentRoutes);
 
 // Basic route
 app.get("/", async (req: Request, res: Response) => {

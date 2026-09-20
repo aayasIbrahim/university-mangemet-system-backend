@@ -21,6 +21,7 @@ model StudentProfile {
   attendances Attendance[]
   examMarks   ExamMark[]
   transcripts Transcript[]
+  invoices    Invoice[]
 
   @@index([status])
   @@index([studentIdNo])

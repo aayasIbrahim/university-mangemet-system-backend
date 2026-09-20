@@ -1,0 +1,31 @@
+model Invoice {
+  id         String         @id @default(uuid()) @db.Uuid
+  invoiceNo  String         @unique // Human-readable reference (e.g., INV-2026-0001)
+  studentId  String         @db.Uuid
+  student    StudentProfile @relation(fields: [studentId], references: [id], onDelete: Restrict) // Changed to Restrict
+  semesterId String         @db.Uuid
+  semester   Semester       @relation(fields: [semesterId], references: [id], onDelete: Restrict)
+
+  totalAmount Int
+  paidAmount  Int @default(0)
+  dueAmount   Int // Calculated as totalAmount - paidAmount for quick querying
+
+  status           PaymentStatus @default(PENDING)
+  dueDate          DateTime
+  currency         String        @default("bdt") @db.VarChar(3)
+  stripeCheckoutId String?       @unique
+
+  // Audit Timestamps
+  createdById   String   @db.Uuid
+  createdBy     User     @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdByRole Role
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@index([studentId])
+  @@index([status])
+  @@map("invoices")
+}
