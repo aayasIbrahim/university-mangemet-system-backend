@@ -38,6 +38,8 @@ enum StudentStatus {
   WITHDRAWN
 }
 
+
+
 enum CourseType {
   CORE
   ELECTIVE
