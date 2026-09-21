@@ -6,6 +6,12 @@ dotenv.config({ path: path.join(process.cwd(), ".env") });
 export default {
   node_env: process.env.NODE_ENV,
   port: process.env.PORT || "5000",
+  rate_limit_window_ms:
+    Number.parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "", 10) || 15 * 60 * 1000,
+  rate_limit_max:
+    Number.parseInt(process.env.RATE_LIMIT_MAX ?? "", 10) || 300,
+  auth_rate_limit_max:
+    Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX ?? "", 10) || 20,
   database_url: process.env.DATABASE_URL,
   bak_url: process.env.APP_URL,
   frontend_url: process.env.FRONTEND_URL,

@@ -10,6 +10,10 @@ import httpStatus from "http-status";
 import config from "./app/config";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
+import {
+  apiRateLimiter,
+  authRateLimiter,
+} from "./app/middleware/rateLimiter";
 import { AuthRoutes } from "./app/module/auth/auth.route";
 import { UserRoutes } from "./app/module/user/user.route";
 import { StudentApplicationRoutes } from "./app/module/studentApplication/studentApplication.route";
@@ -38,6 +42,8 @@ app.use(
   }),
 );
 
+app.use("/api/v1", apiRateLimiter);
+
 app.use(
   "/api/v1/payments/webhook",
   express.raw({ type: "application/json" }),
@@ -50,7 +56,7 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cookieParser());
-app.use("/api/v1/auth", AuthRoutes);
+app.use("/api/v1/auth", authRateLimiter, AuthRoutes);
 app.use("/api/v1/user", UserRoutes);
 app.use("/api/v1/student-applications", StudentApplicationRoutes);
 app.use("/api/v1/departments", DepartmentRoutes);
