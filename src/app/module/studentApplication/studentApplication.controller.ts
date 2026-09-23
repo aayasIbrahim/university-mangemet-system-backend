@@ -3,14 +3,29 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { StudentApplicationService } from "./studentApplication.service";
+import { StudentApplicationValidation } from "./studentApplication.validation";
+import { AppError } from "../../utils/AppError";
 
 const apply = catchAsync(async (req: Request, res: Response) => {
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  const resume = files?.["resume"] ? files["resume"][0] : null;
+  const additionalFiles = files?.["additionalFiles"] || [];
+
+  const zodValidationResult = StudentApplicationValidation.apply.safeParse(
+    JSON.parse(req.body.data),
+  );
+
+  if (!zodValidationResult.success) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      zodValidationResult.error.issues[0].message,
+    );
+  }
+  const payload = zodValidationResult.data;
   const result = await StudentApplicationService.apply(
-    req.body,
-    req.files as {
-      resume?: Express.Multer.File[];
-      additionalFiles?: Express.Multer.File[];
-    },
+    payload,
+    resume,
+    additionalFiles,
   );
   sendResponse(res, {
     statusCode: httpStatus.CREATED,

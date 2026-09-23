@@ -1,20 +1,70 @@
 import { z } from "zod";
-
 const apply = z.object({
-  firstName: z.string().trim().min(2).max(100),
-  middleName: z.string().trim().max(100).optional().or(z.literal("")),
-  lastName: z.string().trim().min(2).max(100),
-  email: z.email().transform((value) => value.toLowerCase()),
-  phone: z.string().trim().min(8).max(32).optional().or(z.literal("")),
-  password: z.string().min(8).regex(/[a-z]/).regex(/[A-Z]/).regex(/[0-9]/).regex(/[^A-Za-z0-9]/),
-  programId: z.uuid(),
-  batch: z.string().trim().min(2).max(50),
-  address: z.string().trim().min(5).max(2000),
-  emergencyPhone: z.string().trim().min(8).max(32).optional().or(z.literal("")),
+  user: z.object({
+    firstName: z
+      .string( "First name is required" ) // 
+      .trim()
+      .min(2, "First name must be at least 2 characters long"),
+      
+    middleName: z.string().trim().max(100).optional().or(z.literal("")),
+    
+    lastName: z
+      .string( "Last name is required" ) // 
+      .trim()
+      .min(2, "Last name must be at least 2 characters long"),
+      
+    email: z
+      .string( "Email is required" ) // 🟢
+      .email("Invalid email format")
+      .trim()
+      .toLowerCase(),
+      
+    phone: z.string().trim().min(8).max(32).optional().or(z.literal("")),
+  }),
+
+  studentApplication: z.object({
+    programId: z
+      .string("Program ID is required" ) // 🟢 ফিক্সড
+      .uuid("Invalid Program ID format"),
+      
+    batch: z
+      .string( "Batch is required" ) // 🟢 ফিক্সড
+      .trim()
+      .min(2, "Batch name must be at least 2 characters long")
+      .max(50),
+      
+    address: z
+      .string( "Address is required" ) // 🟢 ফিক্সড
+      .trim()
+      .min(5, "Address must be at least 5 characters long")
+      .max(2000),
+      
+    emergencyPhone: z
+      .string()
+      .trim()
+      .min(8, "Emergency phone must be at least 8 characters long")
+      .max(32)
+      .optional()
+      .or(z.literal("")),
+  }),
+});
+const verifyEmail = z.object({
+  email: z.string().email("Invalid email"),
+  otp: z.string().length(6, "OTP must be exactly 6 characters"),
 });
 
-const verifyEmail = z.object({ email: z.email(), otp: z.string().length(6) });
-const approve = z.object({ applicationId: z.uuid() });
-const reject = z.object({ applicationId: z.uuid(), reason: z.string().trim().min(3).max(500) });
+const approve = z.object({
+  applicationId: z.string().uuid("Invalid Application ID"),
+});
 
-export const StudentApplicationValidation = { apply, verifyEmail, approve, reject };
+const reject = z.object({
+  applicationId: z.string().uuid("Invalid Application ID"),
+  reason: z.string("Reason is required").trim().min(3).max(500),
+});
+
+export const StudentApplicationValidation = {
+  apply,
+  verifyEmail,
+  approve,
+  reject,
+};

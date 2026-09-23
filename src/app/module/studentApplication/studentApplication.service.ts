@@ -14,31 +14,19 @@ import {
   Role,
   StudentApplicationStatus,
 } from "../../../generated/prisma/enums";
-
-type ApplicationFiles = {
-  resume?: Express.Multer.File[];
-  additionalFiles?: Express.Multer.File[];
-};
-
-const uploadFile = (file: Express.Multer.File) =>
-  new Promise<string>((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(
-        { resource_type: "auto", folder: "student-applications" },
-        (error, result) => {
-          if (error || !result)
-            reject(error || new Error("File upload failed"));
-          else resolve(result.secure_url);
-        },
-      )
-      .end(file.buffer);
-  });
+import { UploadApiResponse } from "cloudinary";
+import {
+  generateApplicationNo,
+  generateZodCompliantPassword,
+} from "./studentApplication.utils";
+import { IApplyStudentApplication } from "./studentApplication.interface";
 
 const apply = async (
-  payload: Record<string, string>,
-  files: ApplicationFiles = {},
+  payload: IApplyStudentApplication,
+  resume: Express.Multer.File | null,
+  additionalFiles: Express.Multer.File[],
 ) => {
-  const email = payload.email.trim().toLowerCase();
+  const email = payload.user.email.trim().toLowerCase();
   const [existingUser, existingApplication, program] = await Promise.all([
     prisma.user.findUnique({ where: { email }, select: { id: true } }),
     prisma.studentApplication.findUnique({
@@ -46,7 +34,11 @@ const apply = async (
       select: { id: true, status: true },
     }),
     prisma.program.findFirst({
-      where: { id: payload.programId, isActive: true, isDeleted: false },
+      where: {
+        id: payload.studentApplication.programId,
+        isActive: true,
+        isDeleted: false,
+      },
       select: { id: true },
     }),
   ]);
@@ -62,71 +54,154 @@ const apply = async (
     );
   if (!program)
     throw new AppError(httpStatus.NOT_FOUND, "Active program not found.");
-  if (!files.resume?.[0])
-    throw new AppError(httpStatus.BAD_REQUEST, "Resume is required.");
+  const resumeUploadResult = await new Promise<UploadApiResponse>(
+    (resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            resource_type: "auto",
+          },
 
+          async (error, result) => {
+            if (error) {
+              return reject(error);
+            }
+
+            if (!result) {
+              return reject(
+                new AppError(
+                  httpStatus.INTERNAL_SERVER_ERROR,
+                  "No result returned from Cloudinary",
+                ),
+              );
+            }
+
+            resolve(result);
+          },
+        )
+        .end(resume?.buffer);
+    },
+  );
+
+  console.log({ resumeUploadResult });
+
+  const additionalFilesUploadResults = await Promise.all(
+    additionalFiles.map((file) => {
+      return new Promise<UploadApiResponse>((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            {
+              resource_type: "auto",
+            },
+
+            async (error, result) => {
+              if (error) {
+                return reject(error);
+              }
+
+              if (!result) {
+                return reject(new Error("No result returned from Cloudinary"));
+              }
+
+              resolve(result);
+            },
+          )
+          .end(file.buffer);
+      });
+    }),
+  );
+
+  const randomStudentPassword = generateZodCompliantPassword();
+  const applicationNo = generateApplicationNo();
   const passwordHash = await bcrypt.hash(
-    payload.password,
+    randomStudentPassword,
     Number(config.bcrypt_salt_rounds),
   );
-  const resumeUrl = await uploadFile(files.resume[0]);
-  const additionalFiles = await Promise.all(
-    (files.additionalFiles || []).map(uploadFile),
-  );
-  const application = await prisma.studentApplication.upsert({
-    where: { email },
-    create: {
-      firstName: payload.firstName,
-      middleName: payload.middleName || null,
-      lastName: payload.lastName,
+
+  const studentApplication = await prisma.user.create({
+    data: {
       email,
-      phone: payload.phone || null,
-      passwordHash,
-      programId: payload.programId,
-      batch: payload.batch,
-      address: payload.address,
-      emergencyPhone: payload.emergencyPhone || null,
-      resumeUrl,
-      additionalFiles,
-      applicationNo: `APP-${new Date().getFullYear()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
+      firstName: payload.user.firstName,
+      middleName: payload.user.middleName || null,
+      lastName: payload.user.lastName,
+      phone: payload.user.phone || null,
+      password: passwordHash,
+      role: Role.STUDENT,
+      needPasswordChange: true,
+      status: UserStatus.ACTIVE,
+
+      studentApplication: {
+        create: {
+          applicationNo,
+          firstName: payload.user.firstName,
+          middleName: payload.user.middleName || null,
+          lastName: payload.user.lastName,
+          email,
+          phone: payload.user.phone || null,
+          passwordHash: passwordHash,
+          programId: payload.studentApplication.programId,
+          batch: payload.studentApplication.batch,
+          address: payload.studentApplication.address,
+          emergencyPhone: payload.studentApplication.emergencyPhone || null,
+          resume: resumeUploadResult.secure_url,
+          resumePublicId: resumeUploadResult.public_id,
+          additionalFiles: additionalFilesUploadResults.map((file) => ({
+            url: file.secure_url,
+            publicId: file.public_id,
+          })),
+        },
+      },
     },
-    update: {
-      firstName: payload.firstName,
-      middleName: payload.middleName || null,
-      lastName: payload.lastName,
-      phone: payload.phone || null,
-      passwordHash,
-      programId: payload.programId,
-      batch: payload.batch,
-      address: payload.address,
-      emergencyPhone: payload.emergencyPhone || null,
-      resumeUrl,
-      additionalFiles,
-      status: StudentApplicationStatus.PENDING,
-      rejectionReason: null,
-      emailVerified: false,
-      verifiedAt: null,
+    include: {
+      studentApplication: {
+        select: {
+          applicationNo: true,
+          email: true,
+        },
+      },
     },
-    include: { program: { select: { id: true, name: true, code: true } } },
   });
-  const otp = crypto.randomInt(100000, 1000000).toString();
-  await redisClient.set(`student-application-otp:${email}`, otp, {
-    expiration: { type: "EX", value: 600 },
+
+  const expirationSeconds = 60 * 60;
+
+  const otpKey = `student-application-otp:${payload.user.email}`;
+  const otpValue = crypto.randomInt(100000, 1000000).toString();
+
+  await redisClient.set(otpKey, otpValue, {
+    expiration: {
+      type: "EX",
+      value: expirationSeconds,
+    },
   });
+
+  const tempatePath = path.join(
+    process.cwd(),
+    "src/app/templates/registration-user-otp.ejs",
+  );
+  const name = [
+    payload.user.firstName,
+    payload.user?.middleName,
+    payload.user.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const templateData = {
+    name,
+    email: payload.user.email,
+    otp: otpValue,
+    expirationMinutes: expirationSeconds / 60,
+  };
+
+  const html = await ejs.renderFile(tempatePath, templateData);
+
   await transporter.sendMail({
     from: config.email_sender,
-    to: email,
-    subject: "Verify your student application",
-    html: await ejs.renderFile(
-      path.join(process.cwd(), "src/app/templates/registration-user-otp.ejs"),
-      { name: payload.firstName, email, otp, expirationMinutes: 10 },
-    ),
+    to: payload.user.email,
+    subject: "Student Application - Email Verification",
+    html,
   });
-  return {
-    applicationNo: application.applicationNo,
-    email: application.email,
-    message: "Verification OTP sent.",
-  };
+
+  return studentApplication;
 };
 
 const verifyEmail = async (emailInput: string, otp: string) => {

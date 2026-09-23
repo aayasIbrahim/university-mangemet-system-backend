@@ -9,10 +9,15 @@ model StudentApplication {
   passwordHash    String                   @db.VarChar(255)
   programId       String                   @db.Uuid
   program         Program                  @relation(fields: [programId], references: [id], onDelete: Restrict)
+
+  
+  userId       String                   @unique @db.Uuid
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
   batch           String                   @db.VarChar(50)
   address         String                   @db.Text
   emergencyPhone  String?                  @db.VarChar(32)
-  resumeUrl       String?                  @db.VarChar(2048)
+  resume          String?
+  resumePublicId  String?
   additionalFiles Json?
   emailVerified   Boolean                  @default(false)
   verifiedAt      DateTime?

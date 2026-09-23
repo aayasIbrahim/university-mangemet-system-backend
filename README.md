@@ -473,6 +473,8 @@ npx prisma studio
 
 You can import the API collection for this backend directly into Postman.
 
+[Open Postman Collection](postman/university-management-system.postman_collection.json)
+
 ### Files
 
 - [postman/university-management-system.postman_collection.json](postman/university-management-system.postman_collection.json)
